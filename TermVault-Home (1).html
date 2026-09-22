@@ -1,0 +1,3730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TermVault - Categories, Subjects, Chapters & Terms</title>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&display=swap');
+
+  :root {
+    --teal: #2dd4bf;
+    --teal-dark: #14b8a6;
+    --accent-rgb: 45,212,191;
+    --ink: #f1f5f9;
+    --muted: #94a3b8;
+    --border: rgba(148,163,184,0.18);
+    --card-solid: rgba(15,23,42,0.72);
+    --card-hover: rgba(30,41,59,0.85);
+    --surface: #0b1220;
+    --surface-2: #111827;
+    --glow: rgba(45,212,191,0.25);
+    --title-grad-from: #f8fafc;
+    --title-grad-to: #cbd5e1;
+    --modal-bg: #0f172a;
+    --toast-bg: #1e293b;
+    --popover-bg: #0f172a;
+    --input-bg: rgba(15,23,42,0.6);
+    --btn-bg: rgba(30,41,59,0.7);
+    --primary-text: #0f172a;
+    --sidebar-width: 248px;
+    --content-offset: 296px;
+  }
+
+  html[data-theme="light"] {
+    --teal: #0d9488;
+    --teal-dark: #0f766e;
+    --accent-rgb: 13,148,136;
+    --ink: #1e293b;
+    --muted: #64748b;
+    --border: rgba(15,23,42,0.1);
+    --card-solid: rgba(255,255,255,0.82);
+    --card-hover: #ffffff;
+    --surface: #f0f4f8;
+    --surface-2: #e8eef5;
+    --glow: rgba(13,148,136,0.2);
+    --title-grad-from: #0f172a;
+    --title-grad-to: #334155;
+    --modal-bg: #ffffff;
+    --toast-bg: #1e293b;
+    --popover-bg: #ffffff;
+    --input-bg: rgba(255,255,255,0.9);
+    --btn-bg: #ffffff;
+    --primary-text: #ffffff;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--ink);
+    background: var(--surface);
+    background-attachment: fixed;
+    transition: background 0.5s ease;
+    padding: 36px 20px 80px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app-shell {
+    display: block;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 12px 0 var(--content-offset);
+    transition: padding-left 0.08s linear;
+  }
+  .app-shell.sidebar-dragging { transition: none; }
+  .sidebar {
+    position: fixed;
+    left: 16px;
+    top: 24px;
+    width: var(--sidebar-width);
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 12px 12px 28px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--card-solid);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.28);
+    z-index: 20;
+    transition: width 0.08s linear, transform 0.15s ease;
+  }
+  .app-shell.sidebar-dragging .sidebar { transition: none; }
+  .app-shell.sidebar-collapsed .sidebar {
+    transform: translateX(calc(-100% - 24px));
+    pointer-events: none;
+  }
+  .sidebar-resize-handle {
+    position: fixed;
+    left: calc(16px + var(--sidebar-width));
+    top: 24px;
+    width: 18px;
+    margin-left: -9px;
+    height: calc(100vh - 48px);
+    cursor: ew-resize;
+    z-index: 21;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: none;
+    transition: left 0.08s linear;
+  }
+  .app-shell.sidebar-dragging .sidebar-resize-handle { transition: none; }
+  .sidebar-resize-handle::after {
+    content: '';
+    width: 3px;
+    height: 44px;
+    border-radius: 3px;
+    background: var(--border);
+    transition: background 0.15s, height 0.15s;
+  }
+  .sidebar-resize-handle:hover::after,
+  .app-shell.sidebar-dragging .sidebar-resize-handle::after {
+    background: var(--teal);
+    height: 64px;
+  }
+  .app-shell.sidebar-collapsed .sidebar-resize-handle { display: none; }
+  .sidebar-reveal-tab {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 24px;
+    width: 22px;
+    height: 64px;
+    border-radius: 0 10px 10px 0;
+    border: 1px solid var(--border);
+    border-left: none;
+    background: var(--card-solid);
+    backdrop-filter: blur(14px);
+    color: var(--muted);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    z-index: 21;
+  }
+  .sidebar-reveal-tab:hover { color: var(--ink); background: var(--card-hover); }
+  .app-shell.sidebar-collapsed .sidebar-reveal-tab { display: flex; }
+  @media (max-width: 900px) {
+    .app-shell { padding-left: 12px !important; }
+    .sidebar, .sidebar-resize-handle, .sidebar-reveal-tab { display: none !important; }
+  }
+  body.focus-mode .sidebar,
+  body.focus-mode .sidebar-resize-handle,
+  body.focus-mode .sidebar-reveal-tab { display: none !important; }
+  body.focus-mode .app-shell { padding-left: 12px !important; }
+
+  /* ===== Right dock: sort/filter panel + A-Z index (terms views) ===== */
+  .right-dock {
+    position: fixed;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 40;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .right-dock.visible { display: flex; }
+  .sort-index {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 6px;
+    border-radius: 12px;
+    background: var(--card-solid);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  .sort-index button {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .sort-index button:hover { color: var(--ink); background: rgba(var(--accent-rgb), 0.1); }
+  .sort-index button.active {
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: var(--primary-text);
+    border-color: transparent;
+  }
+  .az-index {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    padding: 6px 3px;
+    border-radius: 12px;
+    background: var(--card-solid);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  .az-index button {
+    width: 18px;
+    height: 15px;
+    line-height: 15px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 600;
+    text-align: center;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .az-index button:hover,
+  .az-index button:focus-visible {
+    background: rgba(var(--accent-rgb), 0.16);
+    color: var(--ink);
+  }
+  .az-index button.az-disabled {
+    color: var(--muted);
+    opacity: 0.32;
+    cursor: default;
+  }
+  .az-index button.az-disabled:hover { background: transparent; }
+  .az-index-flash {
+    outline: 2px solid var(--teal) !important;
+    outline-offset: 2px;
+  }
+  .az-bubble {
+    position: fixed;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--popover-bg);
+    border: 1px solid var(--border);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+    color: var(--teal);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 34px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 61;
+    opacity: 0;
+    transform: translateY(-50%) scale(0.85);
+    pointer-events: none;
+    transition: opacity 0.12s ease, transform 0.12s ease;
+  }
+  .az-bubble.show { opacity: 1; transform: translateY(-50%) scale(1); }
+  @media (max-width: 900px) {
+    .right-dock { display: none !important; }
+  }
+  .sidebar-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 4px 10px;
+  }
+  .sidebar-jump {
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 9px 10px;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--input-bg);
+    color: var(--ink);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M3 4.5L6 8l3-3.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+  }
+  .sidebar-jump:focus {
+    outline: none;
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15);
+  }
+  .sidebar-jump option {
+    background: var(--modal-bg, #0f172a);
+    color: var(--ink);
+  }
+  .sidebar-tree {
+    position: relative;
+    padding-left: 4px;
+  }
+  .sidebar-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    text-align: left;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.4;
+    padding: 8px 12px 8px 0;
+    margin-bottom: 0;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .sidebar-item:hover {
+    color: var(--ink);
+    background: rgba(var(--accent-rgb), 0.08);
+  }
+  .sidebar-item.active {
+    color: var(--ink);
+    background: rgba(var(--accent-rgb), 0.14);
+    font-weight: 600;
+  }
+  .sidebar-item.active .node-dot {
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.25);
+  }
+
+  /* Node dot */
+  .node-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--muted);
+    border: 2px solid var(--surface, #0b1220);
+    z-index: 1;
+    position: relative;
+  }
+  html[data-theme="light"] .node-dot {
+    border-color: #f0f4f8;
+  }
+  .sidebar-item.level-home .node-dot { background: #818cf8; }
+  .sidebar-item.level-cat .node-dot { background: var(--teal); }
+  .sidebar-item.level-subj .node-dot { background: #f472b6; }
+  .sidebar-item.level-chap .node-dot { background: #60a5fa; }
+  .sidebar-item.active.level-home .node-dot { background: #818cf8; }
+  .sidebar-item.active.level-cat .node-dot { background: var(--teal); }
+  .sidebar-item.active.level-subj .node-dot { background: #f472b6; }
+  .sidebar-item.active.level-chap .node-dot { background: #60a5fa; }
+
+  .sidebar-item .node-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+
+  /* Indent levels + connector rails */
+  .sidebar-item.level-home { padding-left: 4px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+  .sidebar-item.level-cat  { padding-left: 4px; font-weight: 600; color: var(--ink); }
+  .sidebar-item.level-subj { padding-left: 4px; font-size: 13px; }
+  .sidebar-item.level-chap { padding-left: 4px; font-size: 12.5px; }
+
+  .tree-node {
+    position: relative;
+    padding-left: 0;
+  }
+  .tree-node[data-depth="0"] { margin-left: 0; }
+  .tree-node[data-depth="1"] { margin-left: 18px; }
+  .tree-node[data-depth="2"] { margin-left: 36px; }
+  .tree-node[data-depth="3"] { margin-left: 54px; }
+
+  /* Vertical connector line */
+  .tree-node[data-depth="1"]::before,
+  .tree-node[data-depth="2"]::before,
+  .tree-node[data-depth="3"]::before {
+    content: '';
+    position: absolute;
+    left: -9px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(var(--accent-rgb), 0.28);
+  }
+  .tree-node.last[data-depth="1"]::before,
+  .tree-node.last[data-depth="2"]::before,
+  .tree-node.last[data-depth="3"]::before {
+    bottom: auto;
+    height: 18px;
+  }
+
+  /* Horizontal connector into the node */
+  .tree-node[data-depth="1"]::after,
+  .tree-node[data-depth="2"]::after,
+  .tree-node[data-depth="3"]::after {
+    content: '';
+    position: absolute;
+    left: -9px;
+    top: 18px;
+    width: 12px;
+    height: 2px;
+    background: rgba(var(--accent-rgb), 0.28);
+  }
+
+  /* Parent vertical rail for nested groups */
+  .tree-group {
+    position: relative;
+  }
+  .tree-group::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 28px;
+    bottom: 12px;
+    width: 2px;
+    background: rgba(var(--accent-rgb), 0.22);
+  }
+  .tree-group[data-depth="1"]::before { left: 26px; }
+  .tree-group[data-depth="2"]::before { left: 44px; }
+
+  html[data-theme="light"] .tree-node[data-depth="1"]::before,
+  html[data-theme="light"] .tree-node[data-depth="2"]::before,
+  html[data-theme="light"] .tree-node[data-depth="3"]::before,
+  html[data-theme="light"] .tree-node[data-depth="1"]::after,
+  html[data-theme="light"] .tree-node[data-depth="2"]::after,
+  html[data-theme="light"] .tree-node[data-depth="3"]::after,
+  html[data-theme="light"] .tree-group::before {
+    background: rgba(13, 148, 136, 0.28);
+  }
+
+  .sidebar-empty {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 12px;
+    opacity: 0.7;
+  }
+  .wrap {
+    max-width: none;
+    margin: 0;
+    padding: 12px 18px 28px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--card-solid);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  @media (max-width: 900px) {
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+    }
+  }
+  body.focus-mode .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    border-radius: 16px;
+  }
+
+
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    opacity: 0.9;
+  }
+  .level-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(var(--accent-rgb), 0.35);
+    background: rgba(var(--accent-rgb), 0.12);
+    color: var(--teal);
+    width: fit-content;
+  }
+  .level-badge .level-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.55);
+    flex-shrink: 0;
+  }
+  .level-badge[data-level="home"] {
+    border-color: rgba(129, 140, 248, 0.4);
+    background: rgba(129, 140, 248, 0.12);
+    color: #a5b4fc;
+  }
+  .level-badge[data-level="home"] .level-dot { background: #818cf8; box-shadow: 0 0 8px rgba(129,140,248,0.55); }
+  .level-badge[data-level="category"] {
+    border-color: rgba(var(--accent-rgb), 0.4);
+    background: rgba(var(--accent-rgb), 0.14);
+    color: var(--teal);
+  }
+  .level-badge[data-level="subject"] {
+    border-color: rgba(244, 114, 182, 0.4);
+    background: rgba(244, 114, 182, 0.12);
+    color: #f9a8d4;
+  }
+  .level-badge[data-level="subject"] .level-dot { background: #f472b6; box-shadow: 0 0 8px rgba(244,114,182,0.55); }
+  .level-badge[data-level="chapter"] {
+    border-color: rgba(96, 165, 250, 0.4);
+    background: rgba(96, 165, 250, 0.12);
+    color: #93c5fd;
+  }
+  .level-badge[data-level="chapter"] .level-dot { background: #60a5fa; box-shadow: 0 0 8px rgba(96,165,250,0.55); }
+  html[data-theme="light"] .level-badge[data-level="home"] {
+    color: #4f46e5;
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.3);
+  }
+  html[data-theme="light"] .level-badge[data-level="home"] .level-dot { background: #6366f1; }
+  html[data-theme="light"] .level-badge[data-level="category"] {
+    color: #0f766e;
+    background: rgba(13, 148, 136, 0.1);
+    border-color: rgba(13, 148, 136, 0.3);
+  }
+  html[data-theme="light"] .level-badge[data-level="subject"] {
+    color: #be185d;
+    background: rgba(236, 72, 153, 0.1);
+    border-color: rgba(236, 72, 153, 0.3);
+  }
+  html[data-theme="light"] .level-badge[data-level="subject"] .level-dot { background: #ec4899; }
+  html[data-theme="light"] .level-badge[data-level="chapter"] {
+    color: #1d4ed8;
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+  }
+  html[data-theme="light"] .level-badge[data-level="chapter"] .level-dot { background: #3b82f6; }
+  /* crumb styles below */
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--title-grad-from) 0%, var(--title-grad-to) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 4px;
+  }
+  .header-text { min-width: 0; flex: 1; }
+  .theme-toggle {
+    flex-shrink: 0;
+    margin-top: 4px;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--btn-bg);
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.15s ease;
+    padding: 0;
+  }
+  .theme-toggle:hover {
+    border-color: rgba(var(--accent-rgb),0.45);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  }
+  .sub {
+    color: var(--muted);
+    font-size: 14.5px;
+    line-height: 1.55;
+    max-width: 540px;
+    margin-bottom: 24px;
+  }
+
+  .crumbs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 16px;
+    padding: 8px 12px;
+    flex-wrap: wrap;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--card-solid);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .crumb {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 180px;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 8px;
+    transition: color 0.15s, background 0.15s;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .crumb:hover {
+    color: var(--teal);
+    background: rgba(var(--accent-rgb), 0.1);
+  }
+  .crumb.current {
+    color: var(--ink);
+    font-weight: 600;
+    cursor: default;
+    background: rgba(var(--accent-rgb), 0.14);
+    border: 1px solid rgba(var(--accent-rgb), 0.22);
+  }
+  .crumb.current:hover {
+    color: var(--ink);
+    background: rgba(var(--accent-rgb), 0.14);
+  }
+  .crumb-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+  .crumb-sep {
+    color: var(--muted);
+    opacity: 0.45;
+    font-size: 12px;
+    user-select: none;
+    padding: 0 2px;
+    flex-shrink: 0;
+  }
+  html[data-theme="light"] .crumbs {
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+  }
+
+  .row { display: flex; gap: 8px; margin-bottom: 22px; }
+  input, textarea {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 14px;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--input-bg);
+    color: var(--ink);
+    width: 100%;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  input::placeholder, textarea::placeholder { color: rgba(148,163,184,0.55); }
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--teal);
+    background: var(--input-bg);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb),0.18);
+  }
+
+  button {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    white-space: nowrap;
+    background: var(--btn-bg);
+    color: var(--ink);
+    transition: all 0.15s ease;
+  }
+  button:hover { border-color: rgba(var(--accent-rgb),0.45); background: rgba(30,41,59,0.95); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    color: var(--primary-text);
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(var(--accent-rgb),0.25);
+  }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%); filter: brightness(1.08);
+    border-color: transparent;
+    box-shadow: 0 6px 20px rgba(var(--accent-rgb),0.35);
+  }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--ink); border-color: rgba(var(--accent-rgb),0.4); }
+  .btn-danger:hover { color: #f87171; border-color: #f87171; }
+
+  #search {
+    margin-bottom: 22px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+  }
+  #search:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb),0.15);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 14px;
+    align-items: start;
+  }
+
+  /* ===== Home hero + stats ===== */
+  .home-hero {
+    position: relative;
+    margin-bottom: 22px;
+    padding: 22px 24px 20px;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(ellipse 90% 80% at 0% 0%, rgba(129,140,248,0.18), transparent 55%),
+      radial-gradient(ellipse 70% 70% at 100% 20%, rgba(var(--accent-rgb),0.16), transparent 50%),
+      var(--card-solid);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
+    overflow: hidden;
+    display: none;
+  }
+  .home-hero.open {
+    display: block;
+    animation: homeHeroIn 0.28s ease;
+  }
+  @keyframes homeHeroIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .home-hero::after {
+    content: '';
+    position: absolute;
+    right: -40px;
+    top: -40px;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(var(--accent-rgb),0.22), transparent 70%);
+    pointer-events: none;
+  }
+  .home-hero-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--btn-bg);
+    color: var(--muted);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    padding: 0;
+  }
+  .home-hero-close:hover {
+    color: var(--ink);
+    border-color: rgba(var(--accent-rgb),0.4);
+  }
+  /* Floating Knowledge base button — bottom left */
+  .kb-fab {
+    position: fixed;
+    left: 20px;
+    bottom: 24px;
+    z-index: 45;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--card-solid);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.28);
+    color: var(--ink);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .kb-fab.visible { display: inline-flex; }
+  .kb-fab:hover {
+    border-color: rgba(var(--accent-rgb),0.45);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.32);
+  }
+  .kb-fab.active {
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: var(--primary-text);
+    border-color: transparent;
+  }
+  .kb-fab-icon {
+    font-size: 14px;
+    line-height: 1;
+  }
+  @media (max-width: 900px) {
+    .kb-fab { left: 16px; bottom: 16px; }
+  }
+  body.focus-mode .kb-fab { display: none !important; }
+  .home-hero-kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 8px;
+    opacity: 0.95;
+  }
+  .home-hero-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 6px;
+    color: var(--ink);
+    line-height: 1.25;
+  }
+  .home-hero-sub {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.5;
+    max-width: 420px;
+    margin: 0 0 18px;
+  }
+  .home-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .home-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 72px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: rgba(15,23,42,0.35);
+    backdrop-filter: blur(8px);
+  }
+  html[data-theme="light"] .home-stat {
+    background: rgba(255,255,255,0.7);
+  }
+  .home-stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .home-stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .home-section-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .home-section-label span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .home-section-label .home-count-pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(var(--accent-rgb),0.3);
+    background: rgba(var(--accent-rgb),0.1);
+    color: var(--teal);
+  }
+
+  /* Home empty state */
+  .home-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 48px 24px 40px;
+    border-radius: 18px;
+    border: 1.5px dashed rgba(148,163,184,0.28);
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 0%, rgba(var(--accent-rgb),0.08), transparent 60%),
+      transparent;
+  }
+  .home-empty-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 16px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    background: linear-gradient(135deg, rgba(var(--accent-rgb),0.2), rgba(129,140,248,0.15));
+    border: 1px solid rgba(var(--accent-rgb),0.25);
+    box-shadow: 0 8px 24px rgba(var(--accent-rgb),0.15);
+  }
+  .home-empty-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: var(--ink);
+  }
+  .home-empty-sub {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.55;
+    max-width: 340px;
+    margin: 0 auto 20px;
+  }
+  .home-empty-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 20px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: var(--primary-text);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(var(--accent-rgb),0.3);
+    transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+  }
+  .home-empty-cta:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 28px rgba(var(--accent-rgb),0.4);
+  }
+
+  .box {
+    background: var(--card-solid);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.18s ease, transform 0.15s ease, background 0.18s, box-shadow 0.18s;
+  }
+  .box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent, var(--teal)), transparent 80%);
+    opacity: 0.85;
+  }
+  .box:hover {
+    border-color: rgba(var(--accent-rgb),0.4);
+    transform: translateY(-2px);
+    background: var(--card-hover);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(var(--accent-rgb),0.12);
+  }
+  .box[draggable="true"] { cursor: pointer; }
+  .box[draggable="true"]:active { cursor: pointer; }
+  .box.dragging { opacity: 0.4; }
+  .box.drag-over-top { box-shadow: inset 0 3px 0 var(--teal); }
+  .box.drag-over-bottom { box-shadow: inset 0 -3px 0 var(--teal); }
+
+  .box-kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 8px;
+    color: var(--muted);
+  }
+
+  /* Category cards — home showcase */
+  .box-category {
+    padding: 0;
+    border-radius: 16px;
+    background: var(--card-solid);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.04);
+    transition: background 0.2s, border-color 0.2s, transform 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s;
+    overflow: hidden;
+    animation: homeCardIn 0.45s ease both;
+  }
+  .box-category::before {
+    display: block;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent, var(--teal)), transparent 85%);
+    opacity: 1;
+  }
+  .box-category:hover {
+    background: var(--card-hover);
+    transform: translateY(-4px) scale(1.01);
+    box-shadow:
+      0 16px 40px rgba(0,0,0,0.28),
+      0 0 0 1px rgba(var(--accent-rgb),0.2),
+      0 0 32px rgba(var(--accent-rgb),0.12);
+    border-color: rgba(var(--accent-rgb),0.4);
+  }
+  .box-category-inner {
+    padding: 18px 18px 16px;
+  }
+  .box-category .box-category-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .box-category .box-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    background: linear-gradient(145deg, var(--accent, var(--teal)), color-mix(in srgb, var(--accent, var(--teal)) 70%, #000));
+    flex-shrink: 0;
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--accent, var(--teal)) 45%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .box-category .box-dot::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 0 8px rgba(255,255,255,0.5);
+  }
+  .box-category .box-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 0;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+  .box-category .box-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+  .box-category .box-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    background: rgba(var(--accent-rgb),0.08);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(var(--accent-rgb),0.12);
+  }
+  .box-category .box-arrow {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--muted);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 0.18s, transform 0.18s, color 0.18s;
+  }
+  .box-category:hover .box-arrow {
+    opacity: 1;
+    transform: translateX(0);
+    color: var(--teal);
+  }
+  @keyframes homeCardIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .box-category:nth-child(1) { animation-delay: 0.02s; }
+  .box-category:nth-child(2) { animation-delay: 0.06s; }
+  .box-category:nth-child(3) { animation-delay: 0.1s; }
+  .box-category:nth-child(4) { animation-delay: 0.14s; }
+  .box-category:nth-child(5) { animation-delay: 0.18s; }
+  .box-category:nth-child(6) { animation-delay: 0.22s; }
+  .box-category:nth-child(n+7) { animation-delay: 0.26s; }
+
+  html[data-theme="light"] .home-hero {
+    background:
+      radial-gradient(ellipse 90% 80% at 0% 0%, rgba(99,102,241,0.1), transparent 55%),
+      radial-gradient(ellipse 70% 70% at 100% 20%, rgba(var(--accent-rgb),0.1), transparent 50%),
+      rgba(255,255,255,0.85);
+    box-shadow: 0 8px 28px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
+  }
+  html[data-theme="light"] .box-category:hover {
+    box-shadow:
+      0 16px 36px rgba(15,23,42,0.1),
+      0 0 0 1px rgba(var(--accent-rgb),0.22);
+  }
+
+  /* Subject cards */
+  .box-subject {
+    border-radius: 14px;
+    padding: 16px 18px;
+    border-left: 4px solid var(--accent, var(--teal));
+    background: var(--card-solid);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .box-subject::before { display: none; }
+  .box-subject:hover {
+    transform: translateY(-2px);
+    background: var(--card-hover);
+    border-color: rgba(var(--accent-rgb),0.35);
+  }
+  .box-subject .box-kicker { color: var(--muted); }
+  .box-subject .box-title {
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .box-subject .box-title::before {
+    content: '';
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent, var(--teal));
+    flex-shrink: 0;
+    box-shadow: 0 0 8px rgba(var(--accent-rgb),0.5);
+  }
+
+  .box-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    padding-right: 22px;
+    margin-top: 4px;
+    color: var(--ink);
+  }
+  .box-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    background: rgba(var(--accent-rgb),0.12);
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    border: 1px solid rgba(var(--accent-rgb),0.15);
+  }
+  .box-del {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    border-radius: 8px;
+    transition: all 0.12s;
+  }
+  .box-del:hover {
+    color: #f87171;
+    background: rgba(248,113,113,0.12);
+  }
+
+  .add-box {
+    background: transparent;
+    border: 1.5px dashed rgba(148,163,184,0.28);
+    border-radius: 14px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    min-height: 78px;
+    transition: all 0.15s;
+  }
+  .add-box:hover {
+    border-color: var(--teal);
+    color: var(--teal);
+    background: rgba(var(--accent-rgb),0.06);
+  }
+
+  .inline-form { display: none; grid-column: 1 / -1; gap: 8px; }
+  .inline-form.open { display: flex; }
+
+  /* Chapters */
+  .chapter-list { display: flex; flex-direction: column; gap: 8px; }
+  .chapter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--card-solid);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent, var(--teal));
+    border-radius: 12px;
+    padding: 13px 16px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, transform 0.12s, box-shadow 0.15s;
+  }
+  .chapter-row:hover {
+    background: var(--card-hover);
+    border-color: rgba(var(--accent-rgb),0.35);
+    transform: translateX(2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .chapter-row.dragging { opacity: 0.4; }
+  .chapter-row.drag-over-top { box-shadow: inset 0 3px 0 var(--teal); }
+  .chapter-row.drag-over-bottom { box-shadow: inset 0 -3px 0 var(--teal); }
+  .chapter-row-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+  .chapter-index {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    min-width: 22px;
+    flex-shrink: 0;
+  }
+  .chapter-title { font-size: 14.5px; font-weight: 600; overflow-wrap: break-word; min-width: 0; color: var(--ink); }
+  .chapter-row-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .chapter-row .box-count { flex-shrink: 0; }
+  .chapter-del {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    flex-shrink: 0;
+  }
+  .chapter-del:hover { color: #f87171; background: rgba(248,113,113,0.12); }
+  .chapter-chevron { color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 13px; flex-shrink: 0; }
+
+  .add-chapter-row {
+    display: flex;
+    gap: 8px;
+    background: transparent;
+    border: 1.5px dashed rgba(148,163,184,0.28);
+    border-radius: 12px;
+    padding: 12px 14px;
+    align-items: center;
+  }
+  .add-chapter-row-trigger {
+    background: transparent;
+    border: 1.5px dashed rgba(148,163,184,0.28);
+    border-radius: 12px;
+    padding: 13px 14px;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .add-chapter-row-trigger:hover {
+    border-color: var(--teal);
+    color: var(--teal);
+    background: rgba(var(--accent-rgb),0.06);
+  }
+
+  .term-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+    align-items: start;
+  }
+  .term-row {
+    background: var(--card-solid);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .term-row:hover { border-color: rgba(var(--accent-rgb),0.3); }
+  .term-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .term-head:hover { background: rgba(var(--accent-rgb),0.06); }
+  .term-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    min-width: 20px;
+    flex-shrink: 0;
+  }
+  .drag-handle {
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    flex-shrink: 0;
+    line-height: 1;
+    letter-spacing: -1px;
+    opacity: 0.6;
+  }
+  .drag-handle:active { cursor: pointer; }
+  .term-row[draggable="true"] { cursor: default; }
+  .term-row.dragging { opacity: 0.4; }
+  .term-row.drag-over-top { box-shadow: inset 0 3px 0 var(--teal); }
+  .term-row.drag-over-bottom { box-shadow: inset 0 -3px 0 var(--teal); }
+  .term-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 8px currentColor;
+  }
+  .term-name {
+    font-weight: 600;
+    font-size: 14px;
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: break-word;
+    color: var(--ink);
+  }
+  .term-chevron {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    transition: transform 0.18s ease;
+  }
+  .term-row.open .term-chevron { transform: rotate(90deg); color: var(--teal); }
+  .term-body { display: none; padding: 0 16px 16px 52px; }
+  .term-row.open .term-body { display: block; }
+  .term-def {
+    color: var(--muted);
+    font-size: 13.5px;
+    line-height: 1.65;
+    margin-bottom: 10px;
+  }
+  .term-def:empty::before {
+    content: 'no definition added';
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: rgba(148,163,184,0.5);
+    font-style: italic;
+  }
+  .term-body button {
+    padding: 5px 10px;
+    font-size: 12.5px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    line-height: 1;
+  }
+  .term-body button:hover {
+    color: #f87171;
+    border-color: #f87171;
+    background: rgba(248,113,113,0.08);
+  }
+  .term-body-actions { display: flex; gap: 6px; }
+  .btn-copy:hover {
+    color: var(--teal) !important;
+    border-color: var(--teal) !important;
+    background: rgba(var(--accent-rgb),0.1) !important;
+  }
+
+  .add-term-row {
+    display: flex;
+    gap: 8px;
+    background: var(--card-solid);
+    border: 1.5px dashed rgba(148,163,184,0.28);
+    border-radius: 14px;
+    padding: 12px 16px;
+    grid-column: 1 / -1;
+  }
+  .add-term-row input:first-child { max-width: 160px; }
+
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 56px 0;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    grid-column: 1 / -1;
+    opacity: 0.7;
+  }
+
+  .box-title[contenteditable="true"],
+  .chapter-title[contenteditable="true"],
+  .term-name[contenteditable="true"],
+  .term-def[contenteditable="true"] {
+    outline: none;
+    border-bottom: 1px dashed rgba(var(--accent-rgb),0.5);
+    cursor: text;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    background: var(--toast-bg);
+    color: #f1f5f9;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 1px solid rgba(148,163,184,0.2);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ===== Floating hover-preview popover (doesn't affect page layout) ===== */
+  .term-popover {
+    position: fixed;
+    max-width: 320px;
+    background: var(--popover-bg);
+    color: var(--ink);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 13.5px;
+    line-height: 1.6;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--teal);
+    box-shadow: 0 16px 46px rgba(0,0,0,0.3);
+    z-index: 60;
+    opacity: 0;
+    transform: translateY(6px);
+    pointer-events: none;
+    transition: opacity 0.16s ease, transform 0.16s ease;
+  }
+  .term-popover.show { opacity: 1; transform: translateY(0); }
+  .term-popover-title {
+    font-weight: 600;
+    font-size: 12px;
+    margin-bottom: 4px;
+    color: var(--teal);
+  }
+  .term-popover .thd-empty {
+    opacity: 0.55;
+    font-size: 12.5px;
+  }
+
+  .tabbar { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+  .btn-copy-all { margin-left: auto; color: var(--teal); border-color: rgba(var(--accent-rgb),0.4); }
+
+  .btn-copy-all:hover { background: rgba(var(--accent-rgb),0.12); color: var(--teal); }
+  .tab-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tab-btn:hover { border-color: rgba(var(--accent-rgb),0.4); color: var(--ink); }
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: var(--primary-text);
+    border-color: transparent;
+    font-weight: 600;
+  }
+  .term-chapter-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .letter-heading {
+    grid-column: 1 / -1;
+    display: inline-flex;
+    width: fit-content;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary-text);
+    background: linear-gradient(135deg, var(--teal), #818cf8);
+    padding: 4px 14px;
+    border-radius: 999px;
+    margin: 14px 0 4px;
+    box-shadow: 0 4px 12px rgba(var(--accent-rgb),0.25);
+  }
+  .letter-heading:first-child { margin-top: 0; }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2,6,23,0.72);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: var(--modal-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 26px;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+  }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--ink); }
+  .modal-text { font-size: 14px; color: var(--muted); line-height: 1.55; margin-bottom: 22px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+  .btn-confirm-delete {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    color: #fff;
+    border-color: transparent;
+  }
+  .btn-confirm-delete:hover {
+    background: linear-gradient(135deg, #f87171, #ef4444);
+    border-color: transparent;
+  }
+  .modal-box-wide { max-width: 500px; }
+  .modal-text code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: rgba(var(--accent-rgb),0.12);
+    padding: 2px 6px;
+    border-radius: 5px;
+    color: var(--teal);
+  }
+  .paste-textarea {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    min-height: 150px;
+    resize: vertical;
+    margin-bottom: 16px;
+    background: var(--input-bg);
+    border-color: var(--border);
+    color: var(--ink);
+  }
+  .backup-bar { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+  .export-dropdown { position: relative; display: inline-block; }
+  .export-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 220px;
+    max-height: 280px;
+    overflow-y: auto;
+    background: var(--modal-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+    padding: 6px;
+    z-index: 40;
+  }
+  .export-dropdown-menu.show { display: block; }
+  .export-dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--ink);
+    transition: background 0.12s;
+  }
+  .export-dropdown-item:hover {
+    background: rgba(var(--accent-rgb),0.12);
+    color: var(--teal);
+  }
+  .export-dropdown-item-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .export-dropdown-empty {
+    padding: 12px;
+    color: var(--muted);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .category-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148,163,184,0.3) transparent;
+  }
+  .category-tab {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1.5px solid var(--border);
+    background: var(--btn-bg);
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.15s ease;
+  }
+  .category-tab .tab-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 6px currentColor;
+  }
+  .category-tab:hover {
+    border-color: rgba(var(--accent-rgb),0.45);
+    color: var(--ink);
+  }
+  .category-tab.active {
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: var(--primary-text);
+    border-color: transparent;
+    box-shadow: 0 4px 16px rgba(var(--accent-rgb),0.25);
+  }
+  html[data-theme="dark"] .category-tab.active,
+  html:not([data-theme="light"]) .category-tab.active {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: #f1f5f9;
+    border-color: rgba(var(--accent-rgb),0.5);
+    box-shadow: 0 0 0 1px rgba(var(--accent-rgb),0.2), 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .category-tab.drop-ready {
+    border-color: var(--teal);
+    border-style: dashed;
+    background: rgba(var(--accent-rgb),0.12);
+    color: var(--teal);
+  }
+  .category-tab.dragging { opacity: 0.4; }
+  .category-tab.drag-over-left { box-shadow: inset 3px 0 0 var(--teal); }
+  .category-tab.drag-over-right { box-shadow: inset -3px 0 0 var(--teal); }
+
+  /* Scrollbar polish */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(148,163,184,0.25);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.4); }
+
+  /* ===== Terms section — study-card experience ===== */
+  .term-row {
+    background: var(--card-solid);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color 0.18s, box-shadow 0.2s, transform 0.18s;
+    position: relative;
+  }
+  .term-row::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: transparent;
+    transition: background 0.2s;
+  }
+  .term-row:hover {
+    border-color: rgba(var(--accent-rgb),0.35);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+  }
+  .term-row.open {
+    border-color: rgba(var(--accent-rgb),0.4);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.16), 0 0 0 1px rgba(var(--accent-rgb),0.12);
+    transform: translateY(-1px);
+  }
+  .term-row.open::after {
+    background: linear-gradient(180deg, var(--teal), transparent);
+  }
+  .term-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 16px;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .term-head:hover { background: rgba(var(--accent-rgb),0.06); }
+  .term-row.open .term-head {
+    background: rgba(var(--accent-rgb),0.07);
+    border-bottom: 1px solid rgba(var(--accent-rgb),0.12);
+  }
+  .term-body {
+    display: none;
+    padding: 0;
+  }
+  .term-row.open .term-body {
+    display: block;
+    animation: termReveal 0.22s ease;
+  }
+  @keyframes termReveal {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .term-def-wrap {
+    margin: 12px 14px 10px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: rgba(var(--accent-rgb),0.06);
+    border: 1px solid rgba(var(--accent-rgb),0.12);
+    position: relative;
+  }
+  html[data-theme="light"] .term-def-wrap {
+    background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid rgba(15,23,42,0.06);
+    box-shadow: inset 0 1px 2px rgba(15,23,42,0.04);
+  }
+  .term-def-wrap::before {
+    content: '"';
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 28px;
+    line-height: 1;
+    color: rgba(var(--accent-rgb),0.35);
+    position: absolute;
+    top: 6px;
+    left: 10px;
+  }
+  .term-def {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.65;
+    margin: 0 0 0 14px;
+    min-height: 1.2em;
+  }
+  .term-body-actions {
+    display: flex;
+    gap: 6px;
+    padding: 0 14px 14px;
+  }
+  .term-body-actions button {
+    padding: 6px 12px;
+    font-size: 12.5px;
+    border-radius: 8px;
+  }
+
+  /* Light theme soft elevation on terms */
+  html[data-theme="light"] .term-row {
+    box-shadow: 0 2px 12px rgba(15,23,42,0.06), 0 1px 3px rgba(15,23,42,0.04);
+  }
+  html[data-theme="light"] .term-row:hover {
+    box-shadow: 0 8px 24px rgba(15,23,42,0.1);
+  }
+  html[data-theme="light"] .term-row.open {
+    box-shadow: 0 12px 32px rgba(13,148,136,0.12), 0 2px 8px rgba(15,23,42,0.06);
+  }
+  html[data-theme="light"] .box,
+  html[data-theme="light"] .box-category,
+  html[data-theme="light"] .box-subject,
+  html[data-theme="light"] .chapter-row {
+    box-shadow: 0 2px 12px rgba(15,23,42,0.05), 0 1px 3px rgba(15,23,42,0.04);
+  }
+  html[data-theme="light"] .box:hover,
+  html[data-theme="light"] .box-category:hover,
+  html[data-theme="light"] .box-subject:hover {
+    box-shadow: 0 10px 28px rgba(15,23,42,0.1);
+  }
+  html[data-theme="light"] .add-box,
+  html[data-theme="light"] .add-chapter-row-trigger,
+  html[data-theme="light"] .add-chapter-row,
+  html[data-theme="light"] .add-term-row {
+    border-color: rgba(15,23,42,0.14);
+  }
+  html[data-theme="light"] .modal-overlay {
+    background: rgba(15,23,42,0.4);
+  }
+
+  /* ===== Terms spotlight: fade siblings on hover (does NOT block drag) ===== */
+  .term-list {
+    position: relative;
+  }
+  body:not(.is-dragging-term) .term-list:has(.term-row:hover) .term-row:not(:hover) {
+    opacity: 0.28;
+    transform: scale(0.99);
+  }
+  body:not(.is-dragging-term) .term-list:has(.term-row:hover) .term-row:hover {
+    z-index: 8;
+    opacity: 1;
+    transform: scale(1.01);
+    box-shadow:
+      0 12px 32px rgba(0, 0, 0, 0.22),
+      0 0 0 1px rgba(var(--accent-rgb), 0.3);
+  }
+  html[data-theme="light"] body:not(.is-dragging-term) .term-list:has(.term-row:hover) .term-row:hover {
+    box-shadow:
+      0 12px 32px rgba(15, 23, 42, 0.12),
+      0 0 0 1px rgba(var(--accent-rgb), 0.28);
+  }
+  .term-row {
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease,
+      border-color 0.15s ease,
+      box-shadow 0.2s ease,
+      background 0.15s ease;
+  }
+  .term-row.dragging {
+    opacity: 0.45 !important;
+    transform: scale(0.98) !important;
+  }
+  body:not(.is-dragging-term) .term-list:has(.term-row:hover) .letter-heading {
+    opacity: 0.25;
+  }
+  .letter-heading {
+    transition: opacity 0.2s ease;
+  }
+  body:not(.is-dragging-term) .term-list:has(.term-row:hover) .add-term-row {
+    opacity: 0.25;
+  }
+  .add-term-row {
+    transition: opacity 0.2s ease;
+  }
+  .drag-handle {
+    cursor: grab;
+    padding: 4px 2px;
+    border-radius: 4px;
+    user-select: none;
+  }
+  .drag-handle:active { cursor: grabbing; }
+  .term-row[draggable="true"] { cursor: grab; }
+  .term-row[draggable="true"]:active { cursor: grabbing; }
+
+
+
+  /* Light theme: menus, shadows, overlays */
+  html[data-theme="light"] .export-dropdown-menu {
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    box-shadow: 0 12px 36px rgba(15, 23, 42, 0.12);
+  }
+  html[data-theme="light"] .export-dropdown-item {
+    color: #1e293b;
+  }
+  html[data-theme="light"] .export-dropdown-item:hover {
+    background: rgba(13, 148, 136, 0.1);
+    color: #0f766e;
+  }
+  html[data-theme="light"] .modal-box {
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+  }
+  html[data-theme="light"] .modal-title {
+    color: #0f172a;
+  }
+  html[data-theme="light"] .modal-text {
+    color: #64748b;
+  }
+  html[data-theme="light"] .btn-ghost {
+    background: #ffffff;
+    color: #475569;
+    border-color: rgba(15, 23, 42, 0.12);
+  }
+  html[data-theme="light"] .btn-ghost:hover {
+    color: #0f172a;
+    border-color: rgba(13, 148, 136, 0.4);
+    background: #f8fafc;
+  }
+  html[data-theme="light"] button {
+    background: #ffffff;
+    color: #1e293b;
+    border-color: rgba(15, 23, 42, 0.12);
+  }
+  html[data-theme="light"] button:hover {
+    border-color: rgba(13, 148, 136, 0.4);
+    background: #f8fafc;
+  }
+  html[data-theme="light"] .btn-primary {
+    background: linear-gradient(135deg, #0d9488, #0f766e);
+    color: #ffffff;
+    border-color: transparent;
+  }
+  html[data-theme="light"] .btn-primary:hover {
+    filter: brightness(1.06);
+    background: linear-gradient(135deg, #0d9488, #0f766e);
+  }
+  html[data-theme="light"] .tab-btn {
+    background: #ffffff;
+    color: #64748b;
+    border-color: rgba(15, 23, 42, 0.12);
+  }
+  html[data-theme="light"] .tab-btn.active {
+    background: linear-gradient(135deg, #0d9488, #0f766e);
+    color: #ffffff;
+    border-color: transparent;
+  }
+  html[data-theme="light"] .category-tab {
+    background: #ffffff;
+    color: #64748b;
+    border-color: rgba(15, 23, 42, 0.12);
+  }
+  html[data-theme="light"] .category-tab.active {
+    background: linear-gradient(135deg, #0d9488, #0f766e);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(13, 148, 136, 0.25);
+  }
+  html[data-theme="light"] .paste-textarea,
+  html[data-theme="light"] #exportTextarea {
+    background: #f8fafc;
+    color: #1e293b;
+    border-color: rgba(15, 23, 42, 0.12);
+  }
+  html[data-theme="light"] input,
+  html[data-theme="light"] textarea {
+    background: #ffffff;
+    color: #1e293b;
+    border-color: rgba(15, 23, 42, 0.12);
+  }
+  html[data-theme="light"] #search {
+    background: #ffffff;
+  }
+  html[data-theme="light"] .backup-bar .btn-ghost {
+    background: #ffffff;
+  }
+
+
+  /* ===== Focus view — hide chrome only, keep term format unchanged ===== */
+  body.focus-mode .eyebrow { display: none; }
+  body.focus-mode .sub { display: none; }
+  body.focus-mode .crumbs { display: none; }
+  body.focus-mode .category-tabs { display: none; }
+  body.focus-mode #search { display: none; }
+  body.focus-mode .backup-bar { display: none !important; }
+  body.focus-mode .add-term-row { display: none !important; }
+  body.focus-mode .subject-tabbar { display: none !important; }
+  body.focus-mode .header-row { margin-bottom: 12px; }
+  .btn-focus {
+    margin-left: 4px;
+    border-color: rgba(var(--accent-rgb), 0.45) !important;
+    color: var(--teal) !important;
+  }
+  .btn-focus.active,
+  .btn-focus:hover {
+    background: rgba(var(--accent-rgb), 0.12) !important;
+    color: var(--teal) !important;
+    border-color: rgba(var(--accent-rgb), 0.5) !important;
+  }
+  body.focus-mode .btn-focus.active {
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark)) !important;
+    color: var(--primary-text) !important;
+    border-color: transparent !important;
+  }
+
+</style>
+
+</head>
+<body>
+<div class="app-shell" id="appShell">
+  <aside class="sidebar" id="sidebar" aria-label="Navigation"></aside>
+  <div class="sidebar-resize-handle" id="sidebarResizeHandle" title="Drag to resize · double-click to collapse"></div>
+  <div class="sidebar-reveal-tab" id="sidebarRevealTab" title="Show navigation">›</div>
+  <div class="wrap">
+    <div class="header-row">
+      <div class="header-text">
+        <div class="level-badge" id="levelBadge" data-level="home"><span class="level-dot"></span><span id="levelBadgeText">HOME</span></div>
+        <h1 id="pageTitle">TermVault</h1>
+      </div>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light / dark" aria-label="Toggle theme">☾</button>
+    </div>
+    <div class="sub" id="pageSub">Categories hold subjects, subjects hold chapters, chapters hold terms.</div>
+
+    <div class="crumbs" id="crumbs"></div>
+    <div class="category-tabs" id="categoryTabs"></div>
+    <input id="search" type="text" placeholder="Search...">
+
+    <div id="content"></div>
+  </div>
+</div>
+
+<div class="right-dock" id="rightDock">
+  <div class="sort-index" id="sortIndex"></div>
+  <div class="az-index" id="azIndex"></div>
+</div>
+
+<div class="az-bubble" id="azBubble"></div>
+
+<div class="toast" id="toast"></div>
+<div class="term-popover" id="termPopover"></div>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-title" id="modalTitle">Delete this?</div>
+    <div class="modal-text" id="modalText">This can't be undone.</div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-confirm-delete" id="modalConfirmBtn">Delete</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="pasteModalOverlay">
+  <div class="modal-box modal-box-wide">
+    <div class="modal-title">Paste terms</div>
+    <div class="modal-text">One term per line, like <code>IAM : Identity Access Management</code>. The part before the colon becomes the term; everything after becomes the definition. No colon? The whole line becomes the term name.</div>
+    <textarea id="pasteTextarea" class="paste-textarea" placeholder="IAM : Identity Access Management
+JWT : JSON Web Token, used for stateless auth
+Load Balancer"></textarea>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closePasteModal()">Cancel</button>
+      <button class="btn-primary" onclick="addPastedTerms()">Add terms</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="exportModalOverlay">
+  <div class="modal-box modal-box-wide">
+    <div class="modal-title">Your backup</div>
+    <div class="modal-text">This is all your data as text. Click <strong>Copy</strong>, then paste it into Notepad (or any text editor) and save the file with a <code>.json</code> ending — that's your backup. "Try direct download" attempts to save it straight to your Downloads folder, but that doesn't work in every setup.</div>
+    <textarea id="exportTextarea" class="paste-textarea" readonly style="min-height:200px;"></textarea>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeExportModal()">Close</button>
+      <button class="btn-ghost" onclick="downloadExportFile()">Try direct download</button>
+      <button class="btn-primary" onclick="copyExportText()">Copy</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="importChoiceOverlay">
+  <div class="modal-box modal-box-wide">
+    <div class="modal-title">Import backup</div>
+    <div class="modal-text" id="importChoiceText"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeImportChoiceModal()">Cancel</button>
+      <button class="btn-ghost" id="importReplaceBtn">Replace everything</button>
+      <button class="btn-primary" id="importMergeBtn">Merge (keep both)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'termvault_data_v3';
+const LEGACY_KEY = 'termvault_data_v2';
+const THEME_KEY = 'termvault_theme';
+
+function getTheme() {
+  const t = localStorage.getItem(THEME_KEY);
+  return t === 'light' || t === 'dark' ? t : 'dark';
+}
+function applyThemeMode(mode) {
+  document.documentElement.setAttribute('data-theme', mode);
+  const btn = document.getElementById('themeToggle');
+  if (btn) btn.textContent = mode === 'light' ? '☾' : '☀';
+}
+function toggleTheme() {
+  const next = getTheme() === 'light' ? 'dark' : 'light';
+  localStorage.setItem(THEME_KEY, next);
+  applyThemeMode(next);
+  // re-apply level background for current theme
+  applyTheme(view.categoryId, view.level);
+  showToast(next === 'light' ? 'Light theme' : 'Dark theme');
+}
+applyThemeMode(getTheme());
+let data = load();
+let view = { level: 'home', categoryId: null, subjectId: null, chapterId: null };
+let formOpen = { category: false, subject: false, chapter: false };
+let subjectTab = 'chapters';
+let termSort = 'added';
+let focusMode = false;
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+    const legacyRaw = localStorage.getItem(LEGACY_KEY);
+    if (legacyRaw) {
+      const legacySubjects = JSON.parse(legacyRaw);
+      if (Array.isArray(legacySubjects) && legacySubjects.length) {
+        const migrated = [{ id: uid(), name: 'General', subjects: legacySubjects }];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+        return migrated;
+      }
+    }
+    return [];
+  } catch (e) { return []; }
+}
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+function exportBackup() {
+  const payload = { type: 'termvault-full', categories: data };
+  showExportModal(JSON.stringify(payload, null, 2), 'termvault-backup');
+}
+
+function backupBarHtml() {
+  return `
+    <div class="backup-bar">
+      <button class="btn-ghost" onclick="exportBackup()">⇧ Export full backup (.json)</button>
+      <button class="btn-ghost" onclick="document.getElementById('importFileInput').click()">⇩ Import full backup</button>
+      <input type="file" id="importFileInput" accept="application/json" style="display:none" onchange="handleImportFile(event)">
+    </div>`;
+}
+
+function categoryExportBarHtml(cat) {
+  const items = cat.subjects.length
+    ? cat.subjects.map(s => `
+        <div class="export-dropdown-item" onclick="selectExportSubject('${cat.id}','${s.id}')">
+          <span>${escapeHtml(s.name)}</span>
+          <span class="export-dropdown-item-count">${s.chapters.length} ch</span>
+        </div>`).join('')
+    : '<div class="export-dropdown-empty">no subjects yet</div>';
+  return `
+    <div class="backup-bar">
+      <div class="export-dropdown" id="categoryExportDropdown">
+        <button class="btn-ghost" onclick="toggleCategoryExportMenu(event)">⇧ Export a subject ▾</button>
+        <div class="export-dropdown-menu" id="categoryExportMenu">${items}</div>
+      </div>
+      <button class="btn-ghost" onclick="document.getElementById('importCategorySubjectFileInput').click()">⇩ Import a subject</button>
+      <input type="file" id="importCategorySubjectFileInput" accept="application/json" style="display:none" onchange="handleImportCategorySubjectFile(event)">
+    </div>`;
+}
+function toggleCategoryExportMenu(e) {
+  e.stopPropagation();
+  document.getElementById('categoryExportMenu').classList.toggle('show');
+}
+function selectExportSubject(catId, subjectId) {
+  const menu = document.getElementById('categoryExportMenu');
+  if (menu) menu.classList.remove('show');
+  exportSubject(catId, subjectId);
+}
+document.addEventListener('click', () => {
+  const menu = document.getElementById('categoryExportMenu');
+  if (menu) menu.classList.remove('show');
+});
+
+function exportSubjectBarHtml(cat, subj) {
+  return `
+    <div class="backup-bar">
+      <button class="btn-ghost" onclick="exportSubject('${cat.id}','${subj.id}')">⇧ Export this subject</button>
+      <button class="btn-ghost" onclick="document.getElementById('importSubjectFileInput').click()">⇩ Import into this subject</button>
+      <input type="file" id="importSubjectFileInput" accept="application/json" style="display:none" onchange="handleImportSubjectFile(event)">
+    </div>`;
+}
+
+function exportChapterBarHtml(chap) {
+  return `
+    <div class="backup-bar">
+      <button class="btn-ghost" onclick="exportChapter('${chap.id}')">⇧ Export this chapter</button>
+      <button class="btn-ghost" onclick="document.getElementById('importChapterFileInput').click()">⇩ Import into this chapter</button>
+      <input type="file" id="importChapterFileInput" accept="application/json" style="display:none" onchange="handleImportChapterFile(event)">
+    </div>`;
+}
+
+function showExportModal(json, filenamePrefix) {
+  document.getElementById('exportTextarea').value = json;
+  document.getElementById('exportModalOverlay').dataset.filenamePrefix = filenamePrefix || 'termvault-backup';
+  document.getElementById('exportModalOverlay').classList.add('show');
+}
+function closeExportModal() {
+  document.getElementById('exportModalOverlay').classList.remove('show');
+}
+function copyExportText() {
+  const ta = document.getElementById('exportTextarea');
+  ta.focus();
+  ta.select();
+  copyToClipboard(ta.value, 'Copied — paste it into Notepad and save as .json');
+}
+function downloadExportFile() {
+  try {
+    const json = document.getElementById('exportTextarea').value;
+    const prefix = document.getElementById('exportModalOverlay').dataset.filenamePrefix || 'termvault-backup';
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `${prefix}-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (err) {
+    showToast('Download blocked here — use Copy instead');
+  }
+}
+
+// ---- Subject / Chapter scoped export ----
+function exportSubject(catId, subjectId) {
+  const cat = getCategory(catId);
+  const subj = getSubject(cat, subjectId);
+  if (!subj) return;
+  const payload = { type: 'termvault-subject', name: subj.name, chapters: subj.chapters };
+  showExportModal(JSON.stringify(payload, null, 2), `termvault-${subj.name.toLowerCase().replace(/\s+/g, '-')}`);
+}
+function exportChapter(chapterId) {
+  const subj = currentSubject();
+  const chap = getChapter(subj, chapterId);
+  if (!chap) return;
+  const payload = { type: 'termvault-chapter', name: chap.name, terms: chap.terms };
+  showExportModal(JSON.stringify(payload, null, 2), `termvault-${chap.name.toLowerCase().replace(/\s+/g, '-')}`);
+}
+
+// ---- ID reassignment helpers (avoid id collisions on import) ----
+function reassignCategoryIds(categories) {
+  return categories.map(cat => ({
+    ...cat, id: uid(),
+    subjects: (cat.subjects || []).map(subj => ({
+      ...subj, id: uid(),
+      chapters: reassignChapterIds(subj.chapters || [])
+    }))
+  }));
+}
+function reassignChapterIds(chapters) {
+  return chapters.map(ch => ({ ...ch, id: uid(), terms: reassignTermIds(ch.terms || []) }));
+}
+function reassignTermIds(terms) {
+  return terms.map(t => ({ ...t, id: uid() }));
+}
+
+// ---- Generic import-choice modal ----
+function openImportChoiceModal(text, onMerge, onReplace) {
+  document.getElementById('importChoiceText').textContent = text;
+  const mergeBtn = document.getElementById('importMergeBtn');
+  const replaceBtn = document.getElementById('importReplaceBtn');
+  const newMergeBtn = mergeBtn.cloneNode(true);
+  const newReplaceBtn = replaceBtn.cloneNode(true);
+  mergeBtn.parentNode.replaceChild(newMergeBtn, mergeBtn);
+  replaceBtn.parentNode.replaceChild(newReplaceBtn, replaceBtn);
+  newMergeBtn.addEventListener('click', () => { closeImportChoiceModal(); onMerge(); });
+  newReplaceBtn.addEventListener('click', () => { closeImportChoiceModal(); onReplace(); });
+  document.getElementById('importChoiceOverlay').classList.add('show');
+}
+function closeImportChoiceModal() {
+  document.getElementById('importChoiceOverlay').classList.remove('show');
+}
+
+function readJsonFile(e, onParsed) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let parsed;
+    try { parsed = JSON.parse(reader.result); }
+    catch (err) { showToast('That file isn\'t valid JSON'); e.target.value = ''; return; }
+    onParsed(parsed, file.name);
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ---- Full-app import (Home only) — affects ALL categories ----
+function handleImportFile(e) {
+  readJsonFile(e, (parsed, fileName) => {
+    let categories = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.categories) ? parsed.categories : null);
+    if (parsed && parsed.type && parsed.type !== 'termvault-full') {
+      showToast(`That's a ${parsed.type.replace('termvault-', '')} file — use its matching Import button instead`);
+      return;
+    }
+    if (!categories) { showToast('Unrecognized backup format'); return; }
+    openImportChoiceModal(
+      `"${fileName}" has ${categories.length} categor${categories.length === 1 ? 'y' : 'ies'}. Add it alongside everything you already have, or replace your entire app with just this file?`,
+      () => { data = data.concat(reassignCategoryIds(categories)); save(); goHome(); showToast('Merged into all categories'); },
+      () => { data = reassignCategoryIds(categories); save(); goHome(); showToast('Entire app replaced'); }
+    );
+  });
+}
+
+// ---- Category-scoped import — ADDS a whole subject (with all its chapters & terms)
+// into the current category. Never touches or replaces any other subject already there. ----
+function handleImportCategorySubjectFile(e) {
+  readJsonFile(e, (parsed, fileName) => {
+    const cat = getCategory(view.categoryId);
+    if (!cat) return;
+    let chapters = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.chapters) ? parsed.chapters : null);
+    if (parsed && parsed.type && parsed.type !== 'termvault-subject') {
+      showToast(`That's a ${parsed.type.replace('termvault-', '')} file — use its matching Import button instead`);
+      return;
+    }
+    if (!chapters) { showToast('Unrecognized subject backup format'); return; }
+    const name = (parsed && parsed.name) ? parsed.name : fileName.replace(/\.json$/i, '');
+    const newChapters = reassignChapterIds(chapters);
+    const termCount = newChapters.reduce((sum, c) => sum + (c.terms ? c.terms.length : 0), 0);
+    cat.subjects.push({ id: uid(), name, chapters: newChapters });
+    save();
+    render();
+    showToast(`Added "${name}" — ${newChapters.length} chapter${newChapters.length === 1 ? '' : 's'}, ${termCount} term${termCount === 1 ? '' : 's'}`);
+  });
+}
+
+// ---- Subject-scoped import — only touches the current subject's chapters ----
+function handleImportSubjectFile(e) {
+  readJsonFile(e, (parsed, fileName) => {
+    const cat = getCategory(view.categoryId);
+    const subj = getSubject(cat, view.subjectId);
+    if (!subj) return;
+    let chapters = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.chapters) ? parsed.chapters : null);
+    if (parsed && parsed.type && parsed.type !== 'termvault-subject') {
+      showToast(`That's a ${parsed.type.replace('termvault-', '')} file — use its matching Import button instead`);
+      return;
+    }
+    if (!chapters) { showToast('Unrecognized subject backup format'); return; }
+    openImportChoiceModal(
+      `"${fileName}" has ${chapters.length} chapter${chapters.length === 1 ? '' : 's'}. This only affects "${subj.name}" — no other subject or category is touched. Add alongside its current chapters, or replace just this subject's chapters?`,
+      () => { subj.chapters = subj.chapters.concat(reassignChapterIds(chapters)); save(); render(); showToast(`Merged into "${subj.name}"`); },
+      () => { subj.chapters = reassignChapterIds(chapters); save(); render(); showToast(`"${subj.name}"'s chapters replaced`); }
+    );
+  });
+}
+
+// ---- Chapter-scoped import — only touches the current chapter's terms ----
+function handleImportChapterFile(e) {
+  readJsonFile(e, (parsed, fileName) => {
+    const subj = currentSubject();
+    const chap = getChapter(subj, view.chapterId);
+    if (!chap) return;
+    let terms = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.terms) ? parsed.terms : null);
+    if (parsed && parsed.type && parsed.type !== 'termvault-chapter') {
+      showToast(`That's a ${parsed.type.replace('termvault-', '')} file — use its matching Import button instead`);
+      return;
+    }
+    if (!terms) { showToast('Unrecognized chapter backup format'); return; }
+    openImportChoiceModal(
+      `"${fileName}" has ${terms.length} term${terms.length === 1 ? '' : 's'}. This only affects "${chap.name}" — no other chapter, subject, or category is touched. Add alongside its current terms, or replace just this chapter's terms?`,
+      () => { chap.terms = chap.terms.concat(reassignTermIds(terms)); save(); render(); showToast(`Merged into "${chap.name}"`); },
+      () => { chap.terms = reassignTermIds(terms); save(); render(); showToast(`"${chap.name}"'s terms replaced`); }
+    );
+  });
+}
+
+let toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 1200);
+}
+
+function commitEdit(el, onCommit, allowEmpty) {
+  const newVal = el.textContent.trim();
+  if (!newVal && !allowEmpty) { render(); return; }
+  onCommit(newVal);
+  save();
+  showToast('Saved');
+}
+function makeEditable(el, onCommit, allowEmpty) {
+  el.addEventListener('blur', () => commitEdit(el, onCommit, allowEmpty));
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+    if (e.key === 'Escape') { render(); }
+  });
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+function getCategory(id) { return data.find(c => c.id === id); }
+function getSubject(cat, id) { return cat.subjects.find(s => s.id === id); }
+function getChapter(subj, id) { return subj.chapters.find(c => c.id === id); }
+function currentCategory() { return getCategory(view.categoryId); }
+function currentSubject() { const cat = currentCategory(); return cat ? getSubject(cat, view.subjectId) : null; }
+
+const DOT_COLORS = ['#2dd4bf', '#fbbf24', '#f472b6', '#a78bfa', '#60a5fa', '#f87171', '#4ade80'];
+function dotColor(idOrIndex) {
+  let hash = 0;
+  const str = String(idOrIndex);
+  for (let i = 0; i < str.length; i++) hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+  return DOT_COLORS[hash % DOT_COLORS.length];
+}
+
+// Categories get a color spread evenly around the hue wheel based on their
+// position, so no two categories can end up with the same color (unlike the
+// hash-based dotColor, which can collide once there are more than a few items).
+function hslToHex(h, s, l) {
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  const toHex = v => Math.round(v * 255).toString(16).padStart(2, '0');
+  return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+}
+// Persistent unique hues: each category gets a hue at creation and never shares it.
+const GOLDEN = 137.508;
+function nextUniqueHue() {
+  const used = new Set(
+    data
+      .map(c => (typeof c.hue === 'number' ? Math.round(c.hue) % 360 : null))
+      .filter(h => h !== null)
+  );
+  // Start from a seed based on count, then walk golden-angle until free
+  let hue = Math.round((data.length * GOLDEN) % 360);
+  for (let n = 0; n < 360; n++) {
+    const candidate = Math.round((hue + n * GOLDEN) % 360);
+    if (!used.has(candidate)) return candidate;
+  }
+  return Math.floor(Math.random() * 360);
+}
+function ensureCategoryHues() {
+  let changed = false;
+  data.forEach(c => {
+    if (typeof c.hue !== 'number') {
+      c.hue = nextUniqueHue();
+      changed = true;
+    }
+  });
+  // Deduplicate if any collide (e.g. after merge import)
+  const seen = new Set();
+  data.forEach(c => {
+    let h = Math.round(c.hue) % 360;
+    if (seen.has(h)) {
+      c.hue = nextUniqueHue();
+      h = Math.round(c.hue) % 360;
+      changed = true;
+    }
+    seen.add(h);
+  });
+  if (changed) save();
+}
+function categoryColorFor(categoryId) {
+  ensureCategoryHues();
+  const cat = data.find(c => c.id === categoryId);
+  const hue = cat && typeof cat.hue === 'number' ? cat.hue : 174;
+  return hslToHex(hue, 72, 58);
+}
+
+function hexToRgb(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+function shadeHex(hex, percent) {
+  const { r, g, b } = hexToRgb(hex);
+  const clamp = v => Math.max(0, Math.min(255, Math.round(v)));
+  const f = v => clamp(v + (percent < 0 ? v : 255 - v) * percent);
+  return '#' + [f(r), f(g), f(b)].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+const DEFAULT_ACCENT = '#2dd4bf';
+function applyTheme(categoryId, level) {
+  const accent = categoryId ? categoryColorFor(categoryId) : DEFAULT_ACCENT;
+  const dark = shadeHex(accent, -0.28);
+  const { r, g, b } = hexToRgb(accent);
+  const rgb = `${r},${g},${b}`;
+  const root = document.documentElement.style;
+  root.setProperty('--teal', accent);
+  root.setProperty('--teal-dark', dark);
+  root.setProperty('--accent-rgb', rgb);
+  applyBackground(level, rgb);
+}
+
+const LEVEL_BACKGROUNDS_DARK = {
+  home: rgb => `
+    radial-gradient(ellipse 80% 60% at 15% 10%, rgba(99,102,241,0.22), transparent 50%),
+    radial-gradient(ellipse 70% 50% at 85% 15%, rgba(${rgb},0.18), transparent 50%),
+    radial-gradient(ellipse 90% 60% at 50% 100%, rgba(139,92,246,0.14), transparent 55%),
+    radial-gradient(circle at 70% 60%, rgba(45,212,191,0.06), transparent 40%),
+    linear-gradient(165deg, #060b16 0%, #0b1220 40%, #0f172a 100%)`,
+  category: rgb => `
+    radial-gradient(ellipse 70% 55% at 90% 8%, rgba(${rgb},0.22), transparent 50%),
+    radial-gradient(ellipse 60% 50% at 8% 90%, rgba(99,102,241,0.12), transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(${rgb},0.05), transparent 45%),
+    linear-gradient(165deg, #060b16 0%, #0b1220 45%, #0f172a 100%)`,
+  subject: rgb => `
+    radial-gradient(ellipse 65% 50% at 12% 15%, rgba(${rgb},0.2), transparent 50%),
+    radial-gradient(ellipse 55% 45% at 88% 85%, rgba(236,72,153,0.1), transparent 50%),
+    radial-gradient(circle at 60% 30%, rgba(129,140,248,0.06), transparent 40%),
+    linear-gradient(165deg, #060b16 0%, #0b1220 50%, #0f172a 100%)`,
+  chapter: rgb => `
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(${rgb},0.2), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 10% 95%, rgba(59,130,246,0.1), transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(167,139,250,0.06), transparent 40%),
+    linear-gradient(165deg, #060b16 0%, #0b1220 50%, #0f172a 100%)`
+};
+const LEVEL_BACKGROUNDS_LIGHT = {
+  home: rgb => `
+    radial-gradient(ellipse 80% 55% at 12% 8%, rgba(99,102,241,0.12), transparent 50%),
+    radial-gradient(ellipse 70% 50% at 90% 12%, rgba(${rgb},0.14), transparent 50%),
+    radial-gradient(ellipse 80% 50% at 50% 100%, rgba(167,139,250,0.1), transparent 55%),
+    linear-gradient(165deg, #eef2f7 0%, #f4f7fb 40%, #f8fafc 100%)`,
+  category: rgb => `
+    radial-gradient(ellipse 65% 50% at 88% 10%, rgba(${rgb},0.16), transparent 50%),
+    radial-gradient(ellipse 55% 45% at 10% 88%, rgba(99,102,241,0.08), transparent 50%),
+    linear-gradient(165deg, #eef6f4 0%, #f3f7f8 45%, #f8fafc 100%)`,
+  subject: rgb => `
+    radial-gradient(ellipse 60% 48% at 14% 12%, rgba(${rgb},0.14), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 90% 85%, rgba(236,72,153,0.07), transparent 50%),
+    linear-gradient(165deg, #faf4f1 0%, #f6f4f8 50%, #f4f6fb 100%)`,
+  chapter: rgb => `
+    radial-gradient(ellipse 75% 45% at 50% 0%, rgba(${rgb},0.14), transparent 55%),
+    radial-gradient(ellipse 45% 35% at 8% 95%, rgba(59,130,246,0.08), transparent 50%),
+    linear-gradient(165deg, #eef3fa 0%, #f3f4f9 50%, #f7f3f8 100%)`
+};
+function applyBackground(level, rgb) {
+  const map = getTheme() === 'light' ? LEVEL_BACKGROUNDS_LIGHT : LEVEL_BACKGROUNDS_DARK;
+  const fn = map[level] || map.home;
+  document.body.style.background = fn(rgb);
+  document.body.style.backgroundAttachment = 'fixed';
+}
+
+function toggleTerm(chapterId, termId) {
+  const subj = currentSubject();
+  const chap = getChapter(subj, chapterId);
+  const t = chap.terms.find(t => t.id === termId);
+  t.open = !t.open;
+  document.getElementById('termPopover').classList.remove('show');
+  save(); render();
+}
+
+const canHover = window.matchMedia('(hover: hover)').matches;
+let hoverTimer = null;
+function attachHoverPreview() {
+  if (!canHover) return;
+  const pop = document.getElementById('termPopover');
+  document.querySelectorAll('.term-row').forEach(row => {
+    const head = row.querySelector('.term-head');
+    const name = row.querySelector('.term-name').textContent;
+    const def = row.querySelector('.term-def') ? row.querySelector('.term-def').textContent : '';
+    head.addEventListener('mouseenter', () => {
+      if (row.classList.contains('open')) return;
+      clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(() => {
+        pop.innerHTML = `<div class="term-popover-title">${escapeHtml(name)}</div>` +
+          (def
+            ? escapeHtml(def)
+            : `<span class="thd-empty">no definition added yet</span>`);
+        const rect = head.getBoundingClientRect();
+        pop.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 336)) + 'px';
+        pop.style.top = (rect.bottom + 8) + 'px';
+        pop.classList.add('show');
+      }, 250);
+    });
+    head.addEventListener('mouseleave', () => {
+      clearTimeout(hoverTimer);
+      pop.classList.remove('show');
+    });
+  });
+}
+
+function setSubjectTab(tab) { if (tab === 'chapters') exitFocusMode(); subjectTab = tab; document.getElementById('search').value = ''; render(); }
+
+function setTermSort(sort) { termSort = sort; render(); }
+function sortTerms(list, nameOf) {
+  if (termSort === 'added') return list;
+  const sorted = [...list].sort((a, b) => nameOf(a).localeCompare(nameOf(b), undefined, { sensitivity: 'base' }));
+  if (termSort === 'za') sorted.reverse();
+  return sorted;
+}
+function sortBarHtml() {
+  return `
+    <div class="tabbar">
+      <button class="tab-btn btn-copy-all" onclick="copyAllTerms()">⧉ Copy all</button>
+      <button class="tab-btn btn-focus ${focusMode ? 'active' : ''}" onclick="toggleFocusMode()">${focusMode ? '✕ Exit focus' : '◎ Focus view'}</button>
+    </div>`;
+}
+function toggleFocusMode() {
+  focusMode = !focusMode;
+  document.body.classList.toggle('focus-mode', focusMode);
+  render();
+  showToast(focusMode ? 'Focus view — terms only' : 'Normal view');
+}
+function exitFocusMode() {
+  if (!focusMode) return;
+  focusMode = false;
+  document.body.classList.remove('focus-mode');
+  render();
+}
+function letterHeadingIfNeeded(state, name) {
+  if (termSort === 'added') return '';
+  const letter = (name.trim().charAt(0) || '#').toUpperCase();
+  if (letter === state.lastLetter) return '';
+  state.lastLetter = letter;
+  return `<div class="letter-heading">${escapeHtml(letter)}</div>`;
+}
+function numLabel(i) { return termSort === 'added' ? `<span class="term-num">${i + 1}.</span>` : ''; }
+function dragHandle() {
+  return termSort === 'added'
+    ? `<span class="drag-handle" title="Drag to reorder" draggable="false">⠿</span>`
+    : '';
+}
+
+let dragSource = null; // { chapterId, termId }
+function reorderTerm(targetChapterId, targetTermId, before) {
+  if (!dragSource) return;
+  if (dragSource.chapterId === targetChapterId && dragSource.termId === targetTermId) return;
+  const subj = currentSubject();
+  const srcChap = getChapter(subj, dragSource.chapterId);
+  const srcIndex = srcChap.terms.findIndex(t => t.id === dragSource.termId);
+  if (srcIndex === -1) return;
+  const [moved] = srcChap.terms.splice(srcIndex, 1);
+  const tgtChap = getChapter(subj, targetChapterId);
+  let tgtIndex = tgtChap.terms.findIndex(t => t.id === targetTermId);
+  if (tgtIndex === -1) tgtIndex = tgtChap.terms.length;
+  tgtChap.terms.splice(before ? tgtIndex : tgtIndex + 1, 0, moved);
+  save(); render();
+}
+function attachDragAndDrop() {
+  if (termSort !== 'added') return;
+  document.querySelectorAll('.term-row[data-chapter-id][data-term-id]').forEach(row => {
+    const chapterId = row.getAttribute('data-chapter-id');
+    const termId = row.getAttribute('data-term-id');
+    row.setAttribute('draggable', 'true');
+    row.addEventListener('dragstart', e => {
+      // Allow drag from handle / row chrome; block only when editing text or clicking action buttons
+      if (e.target.closest('button')) { e.preventDefault(); return; }
+      if (e.target.closest('[contenteditable="true"]') && !e.target.closest('.drag-handle')) {
+        // If user is selecting/editing the name or def, don't start a drag
+        if (document.activeElement && document.activeElement.isContentEditable) {
+          e.preventDefault();
+          return;
+        }
+      }
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      dragSource = { chapterId, termId };
+      row.classList.add('dragging');
+      document.body.classList.add('is-dragging-term');
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', termId); } catch (err) {}
+    });
+    row.addEventListener('dragend', () => {
+      row.classList.remove('dragging');
+      document.body.classList.remove('is-dragging-term');
+      document.querySelectorAll('.drag-over-top, .drag-over-bottom').forEach(el => el.classList.remove('drag-over-top', 'drag-over-bottom'));
+      dragSource = null;
+    });
+    row.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const rect = row.getBoundingClientRect();
+      const before = (e.clientY - rect.top) < rect.height / 2;
+      row.classList.toggle('drag-over-top', before);
+      row.classList.toggle('drag-over-bottom', !before);
+    });
+    row.addEventListener('dragleave', () => { row.classList.remove('drag-over-top', 'drag-over-bottom'); });
+    row.addEventListener('drop', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const rect = row.getBoundingClientRect();
+      const before = (e.clientY - rect.top) < rect.height / 2;
+      row.classList.remove('drag-over-top', 'drag-over-bottom');
+      reorderTerm(chapterId, termId, before);
+    });
+  });
+}
+
+let boxDragSource = null; // { type, id }
+function reorderBoxes(list, sourceId, targetId, before) {
+  if (sourceId === targetId) return;
+  const srcIndex = list.findIndex(x => x.id === sourceId);
+  if (srcIndex === -1) return;
+  const [moved] = list.splice(srcIndex, 1);
+  let tgtIndex = list.findIndex(x => x.id === targetId);
+  if (tgtIndex === -1) tgtIndex = list.length;
+  list.splice(before ? tgtIndex : tgtIndex + 1, 0, moved);
+  save(); render();
+}
+function attachBoxDragAndDrop(type, getList, extra) {
+  document.querySelectorAll(`[data-drag-type="${type}"]`).forEach(box => {
+    const id = box.getAttribute('data-drag-id');
+    box.addEventListener('dragstart', e => {
+      if (e.target.closest('[contenteditable="true"], button')) { e.preventDefault(); return; }
+      boxDragSource = { type, id, ...(extra ? extra() : {}) };
+      box.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    box.addEventListener('dragend', () => {
+      box.classList.remove('dragging');
+      document.querySelectorAll('.drag-over-top, .drag-over-bottom').forEach(el => el.classList.remove('drag-over-top', 'drag-over-bottom'));
+      document.querySelectorAll('.category-tab.drop-ready').forEach(el => el.classList.remove('drop-ready'));
+    });
+    box.addEventListener('dragover', e => {
+      e.preventDefault();
+      const rect = box.getBoundingClientRect();
+      const before = (e.clientY - rect.top) < rect.height / 2;
+      box.classList.toggle('drag-over-top', before);
+      box.classList.toggle('drag-over-bottom', !before);
+    });
+    box.addEventListener('dragleave', () => box.classList.remove('drag-over-top', 'drag-over-bottom'));
+    box.addEventListener('drop', e => {
+      e.preventDefault();
+      const rect = box.getBoundingClientRect();
+      const before = (e.clientY - rect.top) < rect.height / 2;
+      box.classList.remove('drag-over-top', 'drag-over-bottom');
+      if (!boxDragSource || boxDragSource.type !== type) return;
+      reorderBoxes(getList(), boxDragSource.id, id, before);
+    });
+  });
+}
+
+function renderCategoryTabs() {
+  const wrap = document.getElementById('categoryTabs');
+  if (!data.length) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = data.map(c => `
+    <div class="category-tab ${view.categoryId === c.id ? 'active' : ''}" draggable="true" data-tab-category-id="${c.id}" onclick="goCategory('${c.id}')">
+      <span class="tab-dot" style="background:${view.categoryId === c.id ? '#2dd4bf' : categoryColorFor(c.id)}"></span>
+      ${escapeHtml(c.name)}
+    </div>`).join('');
+  wrap.querySelectorAll('.category-tab').forEach(tab => {
+    const catId = tab.getAttribute('data-tab-category-id');
+
+    tab.addEventListener('dragstart', e => {
+      boxDragSource = { type: 'category-tab', id: catId };
+      tab.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    tab.addEventListener('dragend', () => {
+      tab.classList.remove('dragging');
+      wrap.querySelectorAll('.drop-ready, .drag-over-left, .drag-over-right').forEach(el => el.classList.remove('drop-ready', 'drag-over-left', 'drag-over-right'));
+    });
+
+    tab.addEventListener('dragover', e => {
+      if (!boxDragSource) return;
+      if (boxDragSource.type === 'subject' && boxDragSource.fromCategoryId !== catId) {
+        e.preventDefault();
+        tab.classList.add('drop-ready');
+      } else if (boxDragSource.type === 'category-tab' && boxDragSource.id !== catId) {
+        e.preventDefault();
+        const rect = tab.getBoundingClientRect();
+        const before = (e.clientX - rect.left) < rect.width / 2;
+        tab.classList.toggle('drag-over-left', before);
+        tab.classList.toggle('drag-over-right', !before);
+      }
+    });
+    tab.addEventListener('dragleave', () => tab.classList.remove('drop-ready', 'drag-over-left', 'drag-over-right'));
+    tab.addEventListener('drop', e => {
+      e.preventDefault();
+      const wasDropReady = tab.classList.contains('drop-ready');
+      const before = tab.classList.contains('drag-over-left');
+      tab.classList.remove('drop-ready', 'drag-over-left', 'drag-over-right');
+      if (!boxDragSource) return;
+      if (boxDragSource.type === 'subject' && wasDropReady) {
+        moveSubjectToCategory(boxDragSource.fromCategoryId, boxDragSource.id, catId);
+      } else if (boxDragSource.type === 'category-tab' && boxDragSource.id !== catId) {
+        reorderBoxes(data, boxDragSource.id, catId, before);
+      }
+      boxDragSource = null;
+    });
+  });
+}
+
+function moveSubjectToCategory(fromCategoryId, subjectId, toCategoryId) {
+  const fromCat = getCategory(fromCategoryId);
+  const toCat = getCategory(toCategoryId);
+  if (!fromCat || !toCat) return;
+  const idx = fromCat.subjects.findIndex(s => s.id === subjectId);
+  if (idx === -1) return;
+  const [moved] = fromCat.subjects.splice(idx, 1);
+  toCat.subjects.push(moved);
+  save();
+  showToast(`Moved to ${toCat.name}`);
+  goCategory(toCategoryId);
+}
+
+function goHome() { exitFocusMode(); view = { level: 'home', categoryId: null, subjectId: null, chapterId: null }; document.getElementById('search').value = ''; render(); }
+function goCategory(categoryId) { exitFocusMode(); view = { level: 'category', categoryId, subjectId: null, chapterId: null }; document.getElementById('search').value = ''; render(); }
+function goSubject(categoryId, subjectId) { exitFocusMode(); view = { level: 'subject', categoryId, subjectId, chapterId: null }; subjectTab = 'chapters'; document.getElementById('search').value = ''; render(); }
+function goChapter(categoryId, subjectId, chapterId) { view = { level: 'chapter', categoryId, subjectId, chapterId }; document.getElementById('search').value = ''; render(); }
+
+function toggleForm(kind) { formOpen[kind] = !formOpen[kind]; render(); }
+
+function addCategory() {
+  const input = document.getElementById('newCategoryInput');
+  const name = input.value.trim();
+  if (!name) return;
+  data.push({ id: uid(), name, subjects: [], hue: nextUniqueHue() });
+  formOpen.category = false;
+  save(); render();
+  showToast('Category added');
+}
+function openModal(title, text, onConfirm, confirmLabel) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalText').textContent = text;
+  const btn = document.getElementById('modalConfirmBtn');
+  const newBtn = btn.cloneNode(true);
+  newBtn.textContent = confirmLabel || 'Delete';
+  btn.parentNode.replaceChild(newBtn, btn);
+  newBtn.addEventListener('click', () => { closeModal(); onConfirm(); });
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+function openPasteModal() {
+  document.getElementById('pasteTextarea').value = '';
+  document.getElementById('pasteModalOverlay').classList.add('show');
+  setTimeout(() => document.getElementById('pasteTextarea').focus(), 0);
+}
+function closePasteModal() {
+  document.getElementById('pasteModalOverlay').classList.remove('show');
+}
+function addPastedTerms() {
+  const raw = document.getElementById('pasteTextarea').value;
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  if (!lines.length) { closePasteModal(); return; }
+  const subj = currentSubject();
+  const chap = getChapter(subj, view.chapterId);
+  if (!chap) { closePasteModal(); return; }
+  lines.forEach(line => {
+    const sepIndex = line.indexOf(':');
+    let name, def;
+    if (sepIndex === -1) {
+      name = line;
+      def = '';
+    } else {
+      name = line.slice(0, sepIndex).trim();
+      def = line.slice(sepIndex + 1).trim();
+    }
+    if (!name) return;
+    chap.terms.push({ id: uid(), name, def });
+  });
+  save(); render();
+  closePasteModal();
+  showToast(`Added ${lines.length} term${lines.length === 1 ? '' : 's'}`);
+}
+
+function deleteCategory(id, e) {
+  e.stopPropagation();
+  openModal('Delete category?', 'This will also delete every subject, chapter, and term inside it.', () => {
+    data = data.filter(c => c.id !== id);
+    save(); render();
+    showToast('Category deleted');
+  });
+}
+
+function addSubject() {
+  const cat = currentCategory();
+  if (!cat) return;
+  const input = document.getElementById('newSubjectInput');
+  const name = input.value.trim();
+  if (!name) return;
+  cat.subjects.push({ id: uid(), name, chapters: [] });
+  formOpen.subject = false;
+  save(); render();
+  showToast('Subject added');
+}
+function deleteSubject(id, e) {
+  e.stopPropagation();
+  openModal('Delete subject?', 'This will also delete every chapter and term inside it.', () => {
+    const cat = currentCategory();
+    cat.subjects = cat.subjects.filter(s => s.id !== id);
+    save(); render();
+    showToast('Subject deleted');
+  });
+}
+
+function addChapter() {
+  const subj = currentSubject();
+  if (!subj) return;
+  const input = document.getElementById('newChapterInput');
+  const name = input.value.trim();
+  if (!name) return;
+  subj.chapters.push({ id: uid(), name, terms: [] });
+  formOpen.chapter = false;
+  save(); render();
+  showToast('Chapter added');
+}
+function deleteChapter(chapterId, e) {
+  e.stopPropagation();
+  openModal('Delete chapter?', 'This will also delete every term inside it.', () => {
+    const subj = currentSubject();
+    subj.chapters = subj.chapters.filter(c => c.id !== chapterId);
+    save(); render();
+    showToast('Chapter deleted');
+  });
+}
+
+function addTerm() {
+  const subj = currentSubject();
+  const chap = getChapter(subj, view.chapterId);
+  if (!chap) return;
+  const nameInput = document.getElementById('termName');
+  const defInput = document.getElementById('termDef');
+  const name = nameInput.value.trim();
+  const def = defInput.value.trim();
+  if (!name) { nameInput.focus(); return; }
+  chap.terms.push({ id: uid(), name, def });
+  nameInput.value = ''; defInput.value = '';
+  save(); render();
+  showToast('Term added');
+}
+function deleteTerm(chapterId, termId, e) {
+  e.stopPropagation();
+  openModal('Delete term?', 'This can\'t be undone.', () => {
+    const subj = currentSubject();
+    const chap = getChapter(subj, chapterId);
+    chap.terms = chap.terms.filter(t => t.id !== termId);
+    save(); render();
+    showToast('Term removed');
+  });
+}
+
+function copyToClipboard(text, successMsg) {
+  const fallbackCopy = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try { document.execCommand('copy'); showToast(successMsg); }
+    catch (err) { showToast('Copy failed'); }
+    document.body.removeChild(ta);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => showToast(successMsg)).catch(fallbackCopy);
+  } else {
+    fallbackCopy();
+  }
+}
+
+function copyTerm(e) {
+  e.stopPropagation();
+  const row = e.currentTarget.closest('.term-row');
+  const name = row.querySelector('.term-name').textContent.trim();
+  const def = row.querySelector('.term-def').textContent.trim();
+  const text = def ? `${name} : ${def}` : name;
+  copyToClipboard(text, 'Copied');
+}
+
+function copyAllTerms() {
+  const rows = document.querySelectorAll('#content .term-row');
+  if (!rows.length) { showToast('Nothing to copy'); return; }
+  const lines = Array.from(rows).map(row => {
+    const name = row.querySelector('.term-name').textContent.trim();
+    const def = row.querySelector('.term-def') ? row.querySelector('.term-def').textContent.trim() : '';
+    return def ? `${name} : ${def}` : name;
+  });
+  copyToClipboard(lines.join('\n'), `Copied ${lines.length} term${lines.length === 1 ? '' : 's'}`);
+}
+
+
+function renderSidebar() {
+  const el = document.getElementById('sidebar');
+  if (!el) return;
+
+  // Build quick-jump dropdown options
+  let jumpOpts = `<option value="">Jump to…</option>`;
+  jumpOpts += `<option value="home"${view.level === 'home' ? ' selected' : ''}>Home</option>`;
+  data.forEach(cat => {
+    jumpOpts += `<option value="cat:${cat.id}"${view.level === 'category' && view.categoryId === cat.id ? ' selected' : ''}>${escapeHtml(cat.name)}</option>`;
+    (cat.subjects || []).forEach(subj => {
+      jumpOpts += `<option value="subj:${cat.id}:${subj.id}"${view.level === 'subject' && view.subjectId === subj.id ? ' selected' : ''}>&nbsp;&nbsp;${escapeHtml(subj.name)}</option>`;
+      (subj.chapters || []).forEach(ch => {
+        jumpOpts += `<option value="chap:${cat.id}:${subj.id}:${ch.id}"${view.level === 'chapter' && view.chapterId === ch.id ? ' selected' : ''}>&nbsp;&nbsp;&nbsp;&nbsp;${escapeHtml(ch.name)}</option>`;
+      });
+    });
+  });
+
+  let html = `<div class="sidebar-title">Navigate</div>`;
+  html += `<select class="sidebar-jump" id="sidebarJump" onchange="onSidebarJump(this.value)" aria-label="Jump to location">${jumpOpts}</select>`;
+  html += `<div class="sidebar-tree">`;
+
+  html += `<div class="tree-node" data-depth="0">` +
+    `<button type="button" class="sidebar-item level-home ${view.level === 'home' ? 'active' : ''}" onclick="goHome()">` +
+    `<span class="node-dot"></span><span class="node-label">Home</span></button></div>`;
+
+  if (!data.length) {
+    html += `<div class="sidebar-empty">no categories yet</div></div>`;
+    el.innerHTML = html;
+    return;
+  }
+
+  data.forEach((cat, ci) => {
+    const catActive = view.categoryId === cat.id && view.level === 'category';
+    const catInPath = view.categoryId === cat.id;
+    const subjects = cat.subjects || [];
+    const showSubjects = catInPath && view.level !== 'home';
+    const catLast = ci === data.length - 1 && !showSubjects;
+
+    html += `<div class="tree-group" data-depth="0">`;
+    html += `<div class="tree-node ${catLast ? 'last' : ''}" data-depth="1">` +
+      `<button type="button" class="sidebar-item level-cat ${catActive ? 'active' : ''}" onclick="goCategory('${cat.id}')">` +
+      `<span class="node-dot" style="background:${categoryColorFor(cat.id)}"></span>` +
+      `<span class="node-label">${escapeHtml(cat.name)}</span></button></div>`;
+
+    if (showSubjects) {
+      subjects.forEach((subj, si) => {
+        const subActive = view.subjectId === subj.id && view.level === 'subject';
+        const subInPath = view.subjectId === subj.id;
+        const chapters = subj.chapters || [];
+        const showChapters = subInPath && (view.level === 'subject' || view.level === 'chapter');
+        const subLast = si === subjects.length - 1 && !showChapters;
+
+        html += `<div class="tree-group" data-depth="1">`;
+        html += `<div class="tree-node ${subLast ? 'last' : ''}" data-depth="2">` +
+          `<button type="button" class="sidebar-item level-subj ${subActive ? 'active' : ''}" onclick="goSubject('${cat.id}','${subj.id}')">` +
+          `<span class="node-dot"></span>` +
+          `<span class="node-label">${escapeHtml(subj.name)}</span></button></div>`;
+
+        if (showChapters) {
+          chapters.forEach((ch, chi) => {
+            const chActive = view.chapterId === ch.id && view.level === 'chapter';
+            const chLast = chi === chapters.length - 1;
+            html += `<div class="tree-node ${chLast ? 'last' : ''}" data-depth="3">` +
+              `<button type="button" class="sidebar-item level-chap ${chActive ? 'active' : ''}" onclick="goChapter('${cat.id}','${subj.id}','${ch.id}')">` +
+              `<span class="node-dot"></span>` +
+              `<span class="node-label">${escapeHtml(ch.name)}</span></button></div>`;
+          });
+        }
+        html += `</div>`;
+      });
+    }
+    html += `</div>`;
+  });
+
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+function onSidebarJump(value) {
+  if (!value) return;
+  if (value === 'home') { goHome(); return; }
+  const parts = value.split(':');
+  if (parts[0] === 'cat') goCategory(parts[1]);
+  else if (parts[0] === 'subj') goSubject(parts[1], parts[2]);
+  else if (parts[0] === 'chap') goChapter(parts[1], parts[2], parts[3]);
+}
+
+function renderCrumbs() {
+  const crumbs = document.getElementById('crumbs');
+  if (!crumbs) return;
+
+  const parts = [];
+  parts.push({
+    label: 'Home',
+    level: 'HOME',
+    current: view.level === 'home',
+    onclick: 'goHome()'
+  });
+
+  if (view.level !== 'home' && view.categoryId) {
+    const cat = getCategory(view.categoryId);
+    parts.push({
+      label: cat ? cat.name : 'Category',
+      level: 'CATEGORY',
+      current: view.level === 'category',
+      onclick: `goCategory('${view.categoryId}')`
+    });
+  }
+
+  if ((view.level === 'subject' || view.level === 'chapter') && view.subjectId) {
+    const subj = currentSubject();
+    parts.push({
+      label: subj ? subj.name : 'Subject',
+      level: 'SUBJECT',
+      current: view.level === 'subject',
+      onclick: `goSubject('${view.categoryId}','${view.subjectId}')`
+    });
+  }
+
+  if (view.level === 'chapter' && view.chapterId) {
+    const subj = currentSubject();
+    const chap = subj ? getChapter(subj, view.chapterId) : null;
+    parts.push({
+      label: chap ? chap.name : 'Chapter',
+      level: 'CHAPTER',
+      current: true,
+      onclick: null
+    });
+  }
+
+  // Hide trail on pure home with nothing selected? Still show Home only — useful.
+  let html = '';
+  parts.forEach((p, i) => {
+    if (i > 0) html += `<span class="crumb-sep" aria-hidden="true">›</span>`;
+    if (p.current || !p.onclick) {
+      html += `<span class="crumb current" title="${escapeHtml(p.level)}"><span class="crumb-label">${p.level}</span>${escapeHtml(p.label)}</span>`;
+    } else {
+      html += `<span class="crumb" onclick="${p.onclick}" title="Go to ${escapeHtml(p.label)}"><span class="crumb-label">${p.level}</span>${escapeHtml(p.label)}</span>`;
+    }
+  });
+  crumbs.innerHTML = html;
+}
+
+
+function setLevelBadge(level, label) {
+  const badge = document.getElementById('levelBadge');
+  const text = document.getElementById('levelBadgeText');
+  if (!badge || !text) return;
+  badge.setAttribute('data-level', level);
+  text.textContent = label;
+}
+
+function homeStats() {
+  let subjects = 0, chapters = 0, terms = 0;
+  data.forEach(c => {
+    subjects += (c.subjects || []).length;
+    (c.subjects || []).forEach(s => {
+      chapters += (s.chapters || []).length;
+      (s.chapters || []).forEach(ch => { terms += (ch.terms || []).length; });
+    });
+  });
+  return { categories: data.length, subjects, chapters, terms };
+}
+
+const KB_OPEN_KEY = 'termvault_kbOpen';
+function isKbOpen() { return localStorage.getItem(KB_OPEN_KEY) === '1'; }
+function setKbOpen(open) {
+  localStorage.setItem(KB_OPEN_KEY, open ? '1' : '0');
+}
+function toggleKnowledgeBase() {
+  setKbOpen(!isKbOpen());
+  render();
+}
+function closeKnowledgeBase() {
+  setKbOpen(false);
+  render();
+}
+
+function updateKbFab() {
+  let fab = document.getElementById('kbFab');
+  if (!fab) {
+    fab = document.createElement('button');
+    fab.id = 'kbFab';
+    fab.type = 'button';
+    fab.className = 'kb-fab';
+    fab.innerHTML = '<span class="kb-fab-icon">◈</span><span>Knowledge base</span>';
+    fab.onclick = toggleKnowledgeBase;
+    document.body.appendChild(fab);
+  }
+  const onHome = view.level === 'home';
+  fab.classList.toggle('visible', onHome);
+  fab.classList.toggle('active', onHome && isKbOpen());
+  fab.title = isKbOpen() ? 'Hide knowledge base stats' : 'Show knowledge base stats';
+}
+
+function renderHome(query) {
+  setLevelBadge('home', 'HOME · CATEGORIES');
+  document.getElementById('pageTitle').textContent = 'TermVault';
+  document.getElementById('pageSub').textContent = 'Your knowledge, layered. Categories → subjects → chapters → terms.';
+  document.getElementById('search').placeholder = 'Search categories...';
+
+  ensureCategoryHues();
+
+  let categories = data;
+  if (query) categories = data.filter(c => c.name.toLowerCase().includes(query));
+
+  const stats = homeStats();
+  const kbOpen = isKbOpen();
+  let html = '';
+
+  if (!query) {
+    html += `
+      <div class="home-hero ${kbOpen ? 'open' : ''}" id="homeHero">
+        <button type="button" class="home-hero-close" onclick="closeKnowledgeBase()" title="Close">✕</button>
+        <div class="home-hero-kicker">Knowledge base</div>
+        <div class="home-hero-title">Build your term library</div>
+        <p class="home-hero-sub">Organize concepts into categories, subjects, and chapters — then fill each chapter with terms you want to remember.</p>
+        <div class="home-stats">
+          <div class="home-stat">
+            <span class="home-stat-value">${stats.categories}</span>
+            <span class="home-stat-label">Categories</span>
+          </div>
+          <div class="home-stat">
+            <span class="home-stat-value">${stats.subjects}</span>
+            <span class="home-stat-label">Subjects</span>
+          </div>
+          <div class="home-stat">
+            <span class="home-stat-value">${stats.chapters}</span>
+            <span class="home-stat-label">Chapters</span>
+          </div>
+          <div class="home-stat">
+            <span class="home-stat-value">${stats.terms}</span>
+            <span class="home-stat-label">Terms</span>
+          </div>
+        </div>
+      </div>`;
+    html += backupBarHtml();
+    if (data.length) {
+      html += `
+        <div class="home-section-label">
+          <span>Your categories</span>
+          <span class="home-count-pill">${data.length}</span>
+        </div>`;
+    }
+  }
+
+  html += '<div class="grid">';
+
+  if (!categories.length && !query && !data.length && !formOpen.category) {
+    html += `
+      <div class="home-empty">
+        <div class="home-empty-icon">✦</div>
+        <div class="home-empty-title">Start with a category</div>
+        <p class="home-empty-sub">Categories are the top level — think Frontend, Backend, or Interview Prep. You can always rename them later.</p>
+        <button type="button" class="home-empty-cta" onclick="toggleForm('category')">+ Create first category</button>
+      </div>`;
+  }
+
+  categories.forEach(c => {
+    const subjectCount = (c.subjects || []).length;
+    let termCount = 0;
+    (c.subjects || []).forEach(s => {
+      (s.chapters || []).forEach(ch => { termCount += (ch.terms || []).length; });
+    });
+    html += `
+      <div class="box box-category" style="--accent:${categoryColorFor(c.id)}" draggable="${!query}" data-drag-type="category" data-drag-id="${c.id}" onclick="goCategory('${c.id}')">
+        <button class="box-del" draggable="false" onclick="deleteCategory('${c.id}', event)">✕</button>
+        <div class="box-category-inner">
+          <div class="box-category-row">
+            <span class="box-dot"></span>
+            <div class="box-title" contenteditable="true" draggable="false" onclick="event.stopPropagation()" data-category-id="${c.id}">${escapeHtml(c.name)}</div>
+            <span class="box-arrow">→</span>
+          </div>
+          <div class="box-meta">
+            <span class="box-count">${subjectCount} subject${subjectCount === 1 ? '' : 's'}</span>
+            <span class="box-count">${termCount} term${termCount === 1 ? '' : 's'}</span>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  if (!query) {
+    html += `
+      <div class="inline-form ${formOpen.category ? 'open' : ''}">
+        <input id="newCategoryInput" type="text" placeholder="Category name (e.g. Frontend)" autofocus>
+        <button class="btn-primary" onclick="addCategory()">Add</button>
+        <button class="btn-ghost" onclick="toggleForm('category')">Cancel</button>
+      </div>
+      <div class="add-box" style="display:${formOpen.category || !data.length ? 'none' : 'flex'}" onclick="toggleForm('category')">+ Add category</div>`;
+  }
+  if (!categories.length && query) html += '<div class="empty">no matches found</div>';
+  html += '</div>';
+  document.getElementById('content').innerHTML = html;
+  document.querySelectorAll('.box-title[data-category-id]').forEach(el => {
+    const id = el.getAttribute('data-category-id');
+    makeEditable(el, newVal => { getCategory(id).name = newVal; });
+  });
+  if (!query) attachBoxDragAndDrop('category', () => data);
+  if (formOpen.category) {
+    const el = document.getElementById('newCategoryInput');
+    if (el) {
+      el.focus();
+      el.onkeydown = e => { if (e.key === 'Enter') addCategory(); };
+    }
+  }
+  updateKbFab();
+}
+
+function renderCategory(query) {
+  const cat = getCategory(view.categoryId);
+  if (!cat) { goHome(); return; }
+  setLevelBadge('category', 'CATEGORY');
+  document.getElementById('pageTitle').textContent = cat.name;
+  document.getElementById('pageSub').textContent = 'Subjects inside this category. Click one to see its chapters, drag onto a tab above to move it, click a name to rename it.';
+  document.getElementById('search').placeholder = 'Search subjects...';
+
+  let subjects = cat.subjects;
+  if (query) subjects = cat.subjects.filter(s => s.name.toLowerCase().includes(query));
+
+  let html = (query ? '' : categoryExportBarHtml(cat)) + '<div class="grid">';
+  subjects.forEach(s => {
+    const chapterCount = s.chapters.length;
+    html += `
+      <div class="box box-subject" style="--accent:${dotColor(s.id)}" draggable="${!query}" data-drag-type="subject" data-drag-id="${s.id}" onclick="goSubject('${cat.id}','${s.id}')">
+        <button class="box-del" draggable="false" onclick="deleteSubject('${s.id}', event)">✕</button>
+        <div class="box-kicker">Subject</div>
+        <div class="box-title" contenteditable="true" draggable="false" onclick="event.stopPropagation()" data-subject-id="${s.id}">${escapeHtml(s.name)}</div>
+        <span class="box-count">${chapterCount} chapter${chapterCount === 1 ? '' : 's'}</span>
+      </div>`;
+  });
+  if (!query) {
+    html += `
+      <div class="inline-form ${formOpen.subject ? 'open' : ''}">
+        <input id="newSubjectInput" type="text" placeholder="Subject name (e.g. Spring Boot)" autofocus>
+        <button class="btn-primary" onclick="addSubject()">Add</button>
+        <button class="btn-ghost" onclick="toggleForm('subject')">Cancel</button>
+      </div>
+      <div class="add-box" style="display:${formOpen.subject ? 'none' : 'flex'}" onclick="toggleForm('subject')">+ Add subject</div>`;
+  }
+  if (!subjects.length && query) html += '<div class="empty">no matches found</div>';
+  html += '</div>';
+  document.getElementById('content').innerHTML = html;
+  document.querySelectorAll('.box-title[data-subject-id]').forEach(el => {
+    const id = el.getAttribute('data-subject-id');
+    makeEditable(el, newVal => { getSubject(cat, id).name = newVal; });
+  });
+  if (!query) attachBoxDragAndDrop('subject', () => cat.subjects, () => ({ fromCategoryId: cat.id }));
+  if (formOpen.subject) {
+    const el = document.getElementById('newSubjectInput');
+    el.focus();
+    el.onkeydown = e => { if (e.key === 'Enter') addSubject(); };
+  }
+}
+
+function renderSubject(query) {
+  const cat = getCategory(view.categoryId);
+  if (!cat) { goHome(); return; }
+  const subj = getSubject(cat, view.subjectId);
+  if (!subj) { goCategory(cat.id); return; }
+  document.getElementById('pageTitle').textContent = subj.name;
+  setLevelBadge('subject', subjectTab === 'terms' ? 'SUBJECT · ALL TERMS' : 'SUBJECT · CHAPTERS');
+
+  const tabBar = `
+    <div class="tabbar subject-tabbar">
+      <button class="tab-btn ${subjectTab === 'chapters' ? 'active' : ''}" onclick="setSubjectTab('chapters')">Chapters</button>
+      <button class="tab-btn ${subjectTab === 'terms' ? 'active' : ''}" onclick="setSubjectTab('terms')">All terms</button>
+    </div>`;
+
+  if (subjectTab === 'terms') {
+    renderSubjectAllTerms(cat, subj, query, tabBar);
+  } else {
+    renderSubjectChapters(cat, subj, query, tabBar);
+  }
+}
+
+function renderSubjectChapters(cat, subj, query, tabBar) {
+  setLevelBadge('subject', 'SUBJECT · CHAPTERS');
+  document.getElementById('pageSub').textContent = 'Chapters inside this subject. Click one to see its terms, click a name to rename it.';
+  document.getElementById('search').placeholder = 'Search chapters...';
+
+  let chapters = subj.chapters;
+  if (query) chapters = subj.chapters.filter(c => c.name.toLowerCase().includes(query));
+
+  let html = tabBar + (query ? '' : exportSubjectBarHtml(cat, subj)) + '<div class="chapter-list">';
+  chapters.forEach((c, i) => {
+    const termCount = c.terms.length;
+    html += `
+      <div class="chapter-row" style="--accent:${dotColor(c.id)}" draggable="${!query}" data-drag-type="chapter" data-drag-id="${c.id}" onclick="goChapter('${cat.id}','${subj.id}','${c.id}')">
+        <div class="chapter-row-left">
+          <span class="chapter-index">${String(i + 1).padStart(2, '0')}</span>
+          <span class="chapter-title" contenteditable="true" draggable="false" onclick="event.stopPropagation()" data-chapter-id="${c.id}">${escapeHtml(c.name)}</span>
+        </div>
+        <div class="chapter-row-right">
+          <span class="box-count">${termCount} term${termCount === 1 ? '' : 's'}</span>
+          <button class="chapter-del" draggable="false" onclick="deleteChapter('${c.id}', event)">✕</button>
+          <span class="chapter-chevron">›</span>
+        </div>
+      </div>`;
+  });
+  if (!query) {
+    html += `
+      <div class="add-chapter-row" style="display:${formOpen.chapter ? 'flex' : 'none'}">
+        <input id="newChapterInput" type="text" placeholder="Chapter name (e.g. Dependency Injection)" autofocus>
+        <button class="btn-primary" onclick="addChapter()">Add</button>
+        <button class="btn-ghost" onclick="toggleForm('chapter')">Cancel</button>
+      </div>
+      <div class="add-chapter-row-trigger" style="display:${formOpen.chapter ? 'none' : 'block'}" onclick="toggleForm('chapter')">+ Add chapter</div>`;
+  }
+  if (!chapters.length && query) html += '<div class="empty">no matches found</div>';
+  html += '</div>';
+  document.getElementById('content').innerHTML = html;
+  document.querySelectorAll('.chapter-title[data-chapter-id]').forEach(el => {
+    const id = el.getAttribute('data-chapter-id');
+    makeEditable(el, newVal => { getChapter(subj, id).name = newVal; });
+  });
+  if (!query) attachBoxDragAndDrop('chapter', () => subj.chapters);
+  if (formOpen.chapter) {
+    const el = document.getElementById('newChapterInput');
+    el.focus();
+    el.onkeydown = e => { if (e.key === 'Enter') addChapter(); };
+  }
+}
+
+function renderSubjectAllTerms(cat, subj, query, tabBar) {
+  setLevelBadge('subject', 'SUBJECT · ALL TERMS');
+  document.getElementById('pageSub').textContent = 'Every term across every chapter in this subject, in one place.';
+  document.getElementById('search').placeholder = 'Search all terms...';
+
+  let rows = [];
+  subj.chapters.forEach(c => { c.terms.forEach(t => rows.push({ chapterId: c.id, chapterName: c.name, term: t })); });
+  if (query) {
+    rows = rows.filter(r => r.term.name.toLowerCase().includes(query) || (r.term.def && r.term.def.toLowerCase().includes(query)))
+      .map(r => ({ ...r, term: { ...r.term, open: true } }));
+  }
+  rows = sortTerms(rows, r => r.term.name);
+
+  let html = tabBar + sortBarHtml() + '<div class="term-list">';
+  const letterState = { lastLetter: null };
+  rows.forEach((r, i) => {
+    const t = r.term;
+    html += letterHeadingIfNeeded(letterState, t.name);
+    html += `
+      <div class="term-row ${t.open ? 'open' : ''}" draggable="${termSort === 'added'}" data-chapter-id="${r.chapterId}" data-term-id="${t.id}">
+        <div class="term-head" onclick="toggleTerm('${r.chapterId}','${t.id}')">
+          ${dragHandle()}
+          ${numLabel(i)}
+          <span class="term-dot" style="background:${dotColor(t.id)}"></span>
+          <span class="term-name" data-chapter-id="${r.chapterId}" data-term-id="${t.id}" data-field="name" onclick="event.stopPropagation()" contenteditable="true" draggable="false">${escapeHtml(t.name)}</span>
+          <span class="term-chevron">&gt;</span>
+        </div>
+        <div class="term-body">
+          <div class="term-chapter-label" style="padding: 10px 16px 0;">${escapeHtml(r.chapterName)}</div>
+          <div class="term-def-wrap">
+            <div class="term-def" data-chapter-id="${r.chapterId}" data-term-id="${t.id}" data-field="def" contenteditable="true" draggable="false">${escapeHtml(t.def)}</div>
+          </div>
+          <div class="term-body-actions">
+            <button class="btn-copy" draggable="false" onclick="copyTerm(event)">Copy</button>
+            <button draggable="false" onclick="deleteTerm('${r.chapterId}','${t.id}', event)">✕</button>
+          </div>
+        </div>
+      </div>`;
+  });
+  if (!rows.length) html += `<div class="empty">${query ? 'no matches found' : 'no terms in this subject yet'}</div>`;
+  html += '</div>';
+  document.getElementById('content').innerHTML = html;
+
+  document.querySelectorAll('.term-name[data-term-id]').forEach(el => {
+    const termId = el.getAttribute('data-term-id');
+    const chapterId = el.getAttribute('data-chapter-id');
+    makeEditable(el, newVal => { getChapter(subj, chapterId).terms.find(t => t.id === termId).name = newVal; }, false);
+  });
+  document.querySelectorAll('.term-def[data-term-id]').forEach(el => {
+    const termId = el.getAttribute('data-term-id');
+    const chapterId = el.getAttribute('data-chapter-id');
+    makeEditable(el, newVal => { getChapter(subj, chapterId).terms.find(t => t.id === termId).def = newVal; }, true);
+  });
+  attachHoverPreview();
+  attachDragAndDrop();
+}
+
+function renderChapter(query) {
+  const cat = getCategory(view.categoryId);
+  if (!cat) { goHome(); return; }
+  const subj = getSubject(cat, view.subjectId);
+  if (!subj) { goCategory(cat.id); return; }
+  const chap = getChapter(subj, view.chapterId);
+  if (!chap) { goSubject(cat.id, subj.id); return; }
+  setLevelBadge('chapter', 'CHAPTER · TERMS');
+  document.getElementById('pageTitle').textContent = chap.name;
+  document.getElementById('pageSub').textContent = 'Each dot is a term. Click one to open it and see its definition.';
+  document.getElementById('search').placeholder = 'Search terms...';
+
+  let terms = chap.terms;
+  if (query) terms = chap.terms.filter(t => t.name.toLowerCase().includes(query) || (t.def && t.def.toLowerCase().includes(query))).map(t => ({ ...t, open: true }));
+  terms = sortTerms(terms, t => t.name);
+
+  let html = (query ? '' : exportChapterBarHtml(chap)) + sortBarHtml() + '<div class="term-list">';
+  const letterState = { lastLetter: null };
+  terms.forEach((t, i) => {
+    html += letterHeadingIfNeeded(letterState, t.name);
+    html += `
+      <div class="term-row ${t.open ? 'open' : ''}" draggable="${termSort === 'added'}" data-chapter-id="${chap.id}" data-term-id="${t.id}">
+        <div class="term-head" onclick="toggleTerm('${chap.id}','${t.id}')">
+          ${dragHandle()}
+          ${numLabel(i)}
+          <span class="term-dot" style="background:${dotColor(t.id)}"></span>
+          <span class="term-name" data-term-id="${t.id}" data-field="name" onclick="event.stopPropagation()" contenteditable="true" draggable="false">${escapeHtml(t.name)}</span>
+          <span class="term-chevron">&gt;</span>
+        </div>
+        <div class="term-body">
+          <div class="term-def-wrap">
+            <div class="term-def" data-term-id="${t.id}" data-field="def" contenteditable="true" draggable="false">${escapeHtml(t.def)}</div>
+          </div>
+          <div class="term-body-actions">
+            <button class="btn-copy" draggable="false" onclick="copyTerm(event)">Copy</button>
+            <button draggable="false" onclick="deleteTerm('${chap.id}','${t.id}', event)">✕</button>
+          </div>
+        </div>
+      </div>`;
+  });
+  if (!terms.length) html += `<div class="empty">${query ? 'no matches found' : 'no terms yet'}</div>`;
+  if (!query) {
+    html += `
+      <div class="add-term-row">
+        <input id="termName" type="text" placeholder="Term">
+        <input id="termDef" type="text" placeholder="Definition (optional)">
+        <button class="btn-primary" onclick="addTerm()">Add</button>
+        <button class="btn-ghost" onclick="openPasteModal()">⇩ Paste terms</button>
+      </div>`;
+  }
+  html += '</div>';
+  document.getElementById('content').innerHTML = html;
+  document.querySelectorAll('.term-name[data-term-id]').forEach(el => {
+    const id = el.getAttribute('data-term-id');
+    makeEditable(el, newVal => { getChapter(subj, view.chapterId).terms.find(t => t.id === id).name = newVal; }, false);
+  });
+  document.querySelectorAll('.term-def[data-term-id]').forEach(el => {
+    const id = el.getAttribute('data-term-id');
+    makeEditable(el, newVal => { getChapter(subj, view.chapterId).terms.find(t => t.id === id).def = newVal; }, true);
+  });
+  attachHoverPreview();
+  attachDragAndDrop();
+  if (!query) {
+    document.getElementById('termName').onkeydown = e => { if (e.key === 'Enter') addTerm(); };
+    document.getElementById('termDef').onkeydown = e => { if (e.key === 'Enter') addTerm(); };
+  }
+}
+
+function render() {
+  applyTheme(view.categoryId, view.level);
+  document.body.classList.toggle('focus-mode', focusMode);
+  renderSidebar();
+  renderCrumbs();
+  renderCategoryTabs();
+  const query = document.getElementById('search').value.trim().toLowerCase();
+  if (view.level === 'home') renderHome(query);
+  else if (view.level === 'category') renderCategory(query);
+  else if (view.level === 'subject') renderSubject(query);
+  else if (view.level === 'chapter') renderChapter(query);
+  renderAzIndex();
+  updateKbFab();
+}
+
+document.getElementById('search').addEventListener('input', render);
+
+// ===== Sidebar: draggable resize + collapse/reveal =====
+(function initSidebarResize() {
+  const SIDEBAR_WIDTH_KEY = 'termvault_sidebarWidth';
+  const SIDEBAR_COLLAPSED_KEY = 'termvault_sidebarCollapsed';
+  const MIN_WIDTH = 160;
+  const MAX_WIDTH = 440;
+  const COLLAPSE_THRESHOLD = 110;
+  const SIDEBAR_LEFT = 16;   // fixed gap between viewport edge and the floating nav
+
+  const shell = document.getElementById('appShell');
+  const handle = document.getElementById('sidebarResizeHandle');
+  const revealTab = document.getElementById('sidebarRevealTab');
+  const root = document.documentElement.style;
+
+  // Note: the main content column has a fixed --content-offset (set once in CSS)
+  // and is never touched here — dragging or collapsing the nav only moves the
+  // floating nav itself, it never reflows or shifts the main section.
+  function setWidth(px) {
+    const clamped = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, px));
+    root.setProperty('--sidebar-width', clamped + 'px');
+    return clamped;
+  }
+  function setCollapsed(collapsed) {
+    shell.classList.toggle('sidebar-collapsed', collapsed);
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? '1' : '0');
+  }
+
+  // Restore saved state
+  const savedWidth = parseInt(localStorage.getItem(SIDEBAR_WIDTH_KEY), 10);
+  setWidth(isNaN(savedWidth) ? 248 : savedWidth);
+  setCollapsed(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1');
+
+  let dragging = false;
+  let lastWidth = null;
+
+  function onPointerDown(e) {
+    dragging = true;
+    lastWidth = null;
+    shell.classList.add('sidebar-dragging');
+    shell.classList.remove('sidebar-collapsed');
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  }
+  function onPointerMove(e) {
+    if (!dragging) return;
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    const proposed = x - SIDEBAR_LEFT;
+    if (proposed < COLLAPSE_THRESHOLD) {
+      shell.classList.add('sidebar-collapsed');
+      lastWidth = null;
+    } else {
+      shell.classList.remove('sidebar-collapsed');
+      lastWidth = setWidth(proposed);
+    }
+  }
+  function onPointerUp() {
+    if (!dragging) return;
+    dragging = false;
+    shell.classList.remove('sidebar-dragging');
+    document.body.style.userSelect = '';
+    const collapsedNow = shell.classList.contains('sidebar-collapsed');
+    setCollapsed(collapsedNow);
+    if (!collapsedNow && lastWidth) localStorage.setItem(SIDEBAR_WIDTH_KEY, String(lastWidth));
+  }
+
+  handle.addEventListener('mousedown', onPointerDown);
+  handle.addEventListener('touchstart', onPointerDown, { passive: false });
+  document.addEventListener('mousemove', onPointerMove);
+  document.addEventListener('touchmove', onPointerMove, { passive: false });
+  document.addEventListener('mouseup', onPointerUp);
+  document.addEventListener('touchend', onPointerUp);
+
+  handle.addEventListener('dblclick', () => setCollapsed(true));
+  revealTab.addEventListener('click', () => setCollapsed(false));
+})();
+
+// ===== A-Z index + sort/filter panel for term views =====
+const AZ_LETTERS = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+function azLetterFor(name) {
+  const ch = (name || '').trim().charAt(0).toUpperCase();
+  return /[A-Z]/.test(ch) ? ch : '#';
+}
+function renderSortIndex() {
+  const box = document.getElementById('sortIndex');
+  box.innerHTML = `
+    <button type="button" class="${termSort === 'added' ? 'active' : ''}" onclick="setTermSort('added')">Added</button>
+    <button type="button" class="${termSort === 'az' ? 'active' : ''}" onclick="setTermSort('az')">A → Z</button>
+    <button type="button" class="${termSort === 'za' ? 'active' : ''}" onclick="setTermSort('za')">Z → A</button>`;
+}
+function renderAzIndex() {
+  const dock = document.getElementById('rightDock');
+  const box = document.getElementById('azIndex');
+  const isTermsView =
+    view.level === 'chapter' ||
+    (view.level === 'subject' && subjectTab === 'terms');
+
+  if (!isTermsView) {
+    dock.classList.remove('visible');
+    box.innerHTML = '';
+    return;
+  }
+
+  renderSortIndex();
+
+  const names = Array.from(document.querySelectorAll('#content .term-name'))
+    .map(el => el.textContent);
+
+  if (!names.length) {
+    box.innerHTML = '';
+    dock.classList.add('visible'); // keep sort panel visible even with no terms yet
+    return;
+  }
+
+  const available = new Set(names.map(azLetterFor));
+  box.innerHTML = AZ_LETTERS.map(letter =>
+    `<button type="button" class="${available.has(letter) ? '' : 'az-disabled'}" data-letter="${letter}" ${available.has(letter) ? '' : 'tabindex="-1"'}>${letter === '#' ? '#' : letter}</button>`
+  ).join('');
+  dock.classList.add('visible');
+
+  box.querySelectorAll('button:not(.az-disabled)').forEach(btn => {
+    btn.addEventListener('click', () => jumpToLetter(btn.getAttribute('data-letter')));
+    btn.addEventListener('mouseenter', () => showAzBubble(btn));
+    btn.addEventListener('mouseleave', hideAzBubble);
+  });
+}
+function showAzBubble(btn) {
+  const bubble = document.getElementById('azBubble');
+  const dock = document.getElementById('rightDock');
+  const btnRect = btn.getBoundingClientRect();
+  const dockRect = dock.getBoundingClientRect();
+  bubble.textContent = btn.getAttribute('data-letter');
+  bubble.style.top = (btnRect.top + btnRect.height / 2) + 'px';
+  bubble.style.right = (window.innerWidth - dockRect.left + 2) + 'px';
+  bubble.classList.add('show');
+}
+function hideAzBubble() {
+  document.getElementById('azBubble').classList.remove('show');
+}
+function jumpToLetter(letter) {
+  const rows = Array.from(document.querySelectorAll('#content .term-row'));
+  const target = rows.find(row => {
+    const nameEl = row.querySelector('.term-name');
+    return nameEl && azLetterFor(nameEl.textContent) === letter;
+  });
+  if (!target) return;
+  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  target.classList.add('az-index-flash');
+  setTimeout(() => target.classList.remove('az-index-flash'), 900);
+}
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,2720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Syllabus markers</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f2ee;
+    --panel:rgba(255,255,255,0.55);
+    --panel-2:rgba(255,255,255,0.4);
+    --panel-3:rgba(0,0,0,0.045);
+    --border:rgba(0,0,0,0.09);
+    --border-strong:rgba(0,0,0,0.16);
+    --text:#20232b;
+    --text-dim:#6b7280;
+    --accent:#0d9488;
+    --danger:#e0503f;
+    --mono:'JetBrains Mono', monospace;
+    --sans:'Inter', sans-serif;
+    --glass-blur:18px;
+    --bg-grad-1:rgba(13,148,136,0.22);
+    --bg-grad-2:rgba(167,139,250,0.22);
+    --bg-grad-3:rgba(251,146,60,0.18);
+    --bg-grad-4:rgba(96,165,250,0.20);
+    --bg-base-1:#f8f7f4;
+    --bg-base-2:#f0eee9;
+    --preview-text:#3a3f4a;
+    --preview-d0:#20232b;
+    --preview-d1:#3a3f4a;
+    --preview-d2:#6b7280;
+    --preview-d3:#8b93a1;
+    --done-color:#0f9d58;
+    --mindmap-edge:#c8cdd4;
+  }
+  [data-theme="dark"]{
+    --bg:#1a1c22;
+    --panel:rgba(30,33,42,0.72);
+    --panel-2:rgba(38,42,54,0.65);
+    --panel-3:rgba(255,255,255,0.06);
+    --border:rgba(255,255,255,0.1);
+    --border-strong:rgba(255,255,255,0.18);
+    --text:#e8eaef;
+    --text-dim:#9ca3af;
+    --danger:#f07167;
+    --bg-grad-1:rgba(13,148,136,0.18);
+    --bg-grad-2:rgba(167,139,250,0.16);
+    --bg-grad-3:rgba(251,146,60,0.12);
+    --bg-grad-4:rgba(96,165,250,0.14);
+    --bg-base-1:#15171c;
+    --bg-base-2:#1a1c22;
+    --preview-text:#c8cdd6;
+    --preview-d0:#e8eaef;
+    --preview-d1:#c8cdd6;
+    --preview-d2:#9ca3af;
+    --preview-d3:#7a8494;
+    --done-color:#34d399;
+    --mindmap-edge:#4b5563;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 10% 10%, var(--bg-grad-1), transparent 42%),
+      radial-gradient(circle at 90% 12%, var(--bg-grad-2), transparent 45%),
+      radial-gradient(circle at 20% 92%, var(--bg-grad-3), transparent 42%),
+      radial-gradient(circle at 85% 88%, var(--bg-grad-4), transparent 45%),
+      linear-gradient(180deg, var(--bg-base-1) 0%, var(--bg-base-2) 100%);
+    background-attachment:fixed;
+    color:var(--text);
+    font-family:var(--sans);
+    min-height:100vh;
+    transition: background 0.25s ease, color 0.25s ease;
+  }
+  .wrap{ max-width:1180px; margin:0 auto; padding:36px 28px 80px; padding-left:92px; }
+  header{
+    margin-bottom:24px;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:24px;
+    flex-wrap:wrap;
+  }
+  .header-titleblock{ min-width:240px; flex:1 1 320px; }
+  header .kicker{ font-family:var(--mono); font-size:10px; color:var(--accent); letter-spacing:0.06em; }
+  header h1{ font-size:24px; margin:6px 0 8px; font-weight:700; }
+  header p{color:var(--text-dim); font-size:12.5px; max-width:64ch; margin:0;}
+
+  /* NAV: workspace switcher + subject chips (no labels) */
+  .workspace-nav{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:22px;
+    padding:8px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    backdrop-filter:blur(var(--glass-blur));
+    -webkit-backdrop-filter:blur(var(--glass-blur));
+    box-shadow:0 8px 32px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .tabbar{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-wrap:wrap;
+    flex:1;
+    min-width:0;
+    border:none;
+    padding:0;
+    margin:0;
+  }
+  .tab{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    padding:8px 12px;
+    min-height:36px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:11px;
+    font-weight:600;
+    color:var(--text-dim);
+    border:1px solid transparent;
+    position:relative;
+    background:transparent;
+    transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
+  }
+  .tab:hover{ color:var(--text); background:var(--panel-3); }
+  .tab .dot{
+    width:8px; height:8px; border-radius:50%; flex-shrink:0;
+    box-shadow:0 0 0 2px color-mix(in srgb, var(--tab-color, var(--accent)) 22%, transparent);
+  }
+  .tab.active{
+    color:var(--text);
+    background:var(--panel-2);
+    border-color:var(--border);
+  }
+  .tab input.tab-name{
+    background:transparent; border:none; color:inherit; font:inherit;
+    width:auto; min-width:20px; max-width:160px; padding:0;
+    pointer-events:none; cursor:pointer;
+  }
+  .tab input.tab-name:focus{outline:none;}
+  .tab input.tab-name.editing{
+    pointer-events:auto; cursor:text;
+    border-bottom:1px dashed var(--border-strong);
+  }
+  .tab .tab-del{
+    background:none; border:none; color:var(--text-dim); cursor:pointer;
+    font-size:10px; padding:0 2px; line-height:1; opacity:0.45;
+    width:22px; height:22px; border-radius:6px;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .tab .tab-del:hover{opacity:1; color:var(--danger); background:var(--panel-3);}
+  .tab-add{
+    padding:8px 12px;
+    min-height:36px;
+    display:inline-flex; align-items:center; justify-content:center;
+    color:var(--text-dim);
+    cursor:pointer;
+    font-family:var(--mono);
+    font-size:11px;
+    border-radius:10px;
+    border:1px dashed var(--border);
+  }
+  .tab-add:hover{color:var(--accent); border-color:var(--accent); background:color-mix(in srgb, var(--accent) 8%, transparent);}
+
+  .tab{ touch-action:none; }
+  .tab.tab-dragging{ opacity:0.4; }
+  .tab.tab-drop-target{ box-shadow:inset 0 0 0 1.5px var(--accent); }
+  .tab.tab-drop-into{
+    background:color-mix(in srgb, var(--accent) 18%, transparent);
+    border-color:var(--accent);
+  }
+
+  /* Workspaces: one segmented control (not a second tab row) */
+  .tabbar-main{
+    gap:3px;
+    padding:4px;
+    background:var(--panel-3);
+    border-radius:12px;
+    width:100%;
+    border:1.5px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+  }
+  .tabbar-main .tab{
+    font-size:11.5px;
+    font-weight:600;
+    padding:8px 14px;
+    min-height:36px;
+    border-radius:9px;
+    letter-spacing:-0.01em;
+  }
+  .tabbar-main .tab.active{
+    background:var(--panel);
+    color:var(--text);
+    border-color:var(--accent);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent),
+      0 1px 2px rgba(0,0,0,0.08);
+  }
+  [data-theme="dark"] .tabbar-main .tab.active{
+    background:var(--panel-2);
+    border-color:var(--accent);
+    box-shadow:0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+  .tabbar-main .tab-add{
+    border:none;
+    background:transparent;
+    min-width:36px;
+    padding:8px 12px;
+    margin-left:auto;
+    border-radius:9px;
+    font-size:13.5px;
+    line-height:1;
+  }
+  .tabbar-main .tab-add-subject{
+    border:1px dashed var(--border);
+    background:transparent;
+    min-width:auto;
+    margin-left:0;
+    font-size:10.5px;
+    font-family:var(--mono);
+    font-weight:600;
+  }
+  .tabbar-main .tab-add-subject:hover{ color:var(--accent); border-color:var(--accent); background:color-mix(in srgb, var(--accent) 8%, transparent); }
+
+  /* Subjects: chips sitting in the same card, under the switcher */
+  .nav-row-sub{
+    padding:6px 6px 4px;
+    border-top:1px solid var(--border);
+    align-items:center;
+  }
+  .tabbar-sub{ gap:6px; }
+  .tabbar-sub .tab{
+    font-size:10.5px;
+    font-weight:600;
+    padding:6px 11px;
+    min-height:34px;
+    border-radius:999px;
+    background:transparent;
+  }
+  .tabbar-sub .tab.active{
+    color:var(--tab-color, var(--accent));
+    background:color-mix(in srgb, var(--tab-color, var(--accent)) 16%, transparent);
+    border-color:color-mix(in srgb, var(--tab-color, var(--accent)) 40%, var(--border));
+    box-shadow:none;
+  }
+  .tabbar-sub .tab-add{ border-radius:999px; min-height:34px; padding:6px 12px; }
+
+  .panes{ display:flex; gap:24px; align-items:flex-start; }
+  .pane-build{ position:relative; flex:1 1 340px; min-width:280px; }
+  .pane-preview{
+    position:sticky;
+    top:20px;
+    max-height:calc(100vh - 40px);
+    overflow-y:auto;
+    flex:0 0 auto;
+    width:480px;
+    min-width:320px;
+  }
+  .pane-switch{
+    display:none;
+    gap:4px;
+    margin-bottom:12px;
+  }
+  .pane-resize-handle{
+    position:absolute;
+    top:0; right:0; bottom:0;
+    width:14px;
+    cursor:ew-resize;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:5;
+    touch-action:none;
+  }
+  .pane-resize-handle-build{ left:-19px; right:auto; }
+  .pane-resize-handle::after{
+    content:'';
+    width:3px;
+    height:52px;
+    border-radius:3px;
+    background:var(--border-strong);
+  }
+  .pane-resize-handle:hover::after, .pane-resize-handle.active::after{ background:var(--accent); }
+  @media (max-width:860px){
+    .pane-switch{ display:flex; }
+    .panes{flex-direction:column;}
+    .pane-build{ flex-basis:auto; width:100%; }
+    .pane-preview{ position:static; max-height:none; overflow-y:visible; width:auto !important; }
+    .pane-resize-handle{ display:none; }
+    .panes.view-build .pane-preview{ display:none; }
+    .panes.view-preview .pane-build{ display:none; }
+    .wrap{ padding-left:16px; padding-right:16px; padding-top:12px; }
+    .progress-rail{
+      position:sticky;
+      top:0;
+      left:auto;
+      transform:none;
+      flex-direction:row;
+      width:auto;
+      height:auto;
+      padding:10px 14px;
+      margin:0 0 14px;
+      border-radius:12px;
+      gap:12px;
+      z-index:50;
+    }
+    .progress-rail-kicker{
+      writing-mode:horizontal-tb;
+      transform:none;
+      font-size:9.5px;
+    }
+    .progress-rail-track{
+      width:auto;
+      flex:1;
+      height:8px;
+    }
+    .progress-rail-fill{
+      top:0; bottom:0; left:0; right:auto;
+      height:100%;
+      width:var(--pct, 0%);
+    }
+    .progress-rail-pct{ font-size:11px; min-width:2.6em; }
+    .progress-rail-meta{ text-align:left; white-space:nowrap; }
+    .tabbar-main .tab-add{ margin-left:0; }
+  }
+
+  .pane{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:20px;
+    backdrop-filter:blur(var(--glass-blur));
+    -webkit-backdrop-filter:blur(var(--glass-blur));
+    box-shadow:0 8px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .pane h2{ font-size:11px; color:var(--text-dim); font-family:var(--mono); margin:0 0 16px; }
+
+  .chapter{
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-left:3px solid var(--accent);
+    border-radius:10px;
+    padding:12px 14px;
+    margin-bottom:14px;
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    box-shadow:0 4px 16px rgba(0,0,0,0.2);
+  }
+  .node-row{ display:flex; align-items:flex-start; flex-wrap:wrap; gap:6px; margin-bottom:8px; padding:4px; border-radius:6px; border-top:2px solid transparent; border-bottom:2px solid transparent; transition:background .1s; }
+  .node-row .row-main{ display:flex; align-items:center; gap:8px; flex:1; min-width:180px; }
+  .node-row .row-controls{ display:flex; gap:4px; margin-left:auto; }
+  .drag-handle{
+    cursor:grab; color:var(--text-dim); font-size:13px; padding:4px 2px;
+    touch-action:none; user-select:none; flex-shrink:0; line-height:1;
+  }
+  .drag-handle:active{cursor:grabbing;}
+  .done-check{
+    width:26px; height:26px; border-radius:50%; flex-shrink:0;
+    border:1.5px solid var(--border-strong); background:transparent; cursor:pointer;
+    padding:0; margin-top:0; touch-action:manipulation;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:11px; font-weight:700; line-height:1;
+  }
+  .node-row.done .done-check{ background:var(--accent); border-color:var(--accent); }
+  .caret-btn{
+    background:none; border:none; color:var(--text-dim); cursor:pointer;
+    font-size:10px; width:18px; flex-shrink:0; padding:4px 0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .caret-btn:hover{ color:var(--accent); }
+  .caret-spacer{ width:18px; flex-shrink:0; display:inline-block; }
+  .collapsed-count{
+    font-family:var(--mono); font-size:9.5px; color:var(--text-dim);
+    background:var(--panel-3); border:1px solid var(--border); border-radius:10px;
+    padding:2px 8px; flex-shrink:0; margin-left:6px;
+  }
+  .node-row.dragging{ opacity:0.35; }
+  .node-row.drop-before{ border-top-color:var(--accent); }
+  .node-row.drop-after{ border-bottom-color:var(--accent); }
+  .node-row.drop-into{ background:color-mix(in srgb, var(--accent) 18%, transparent); }
+
+  .top-level-dropzone{
+    border:2px dashed var(--border);
+    border-radius:8px;
+    padding:14px;
+    text-align:center;
+    font-family:var(--mono);
+    font-size:10px;
+    color:var(--text-dim);
+    margin-top:6px;
+    opacity:0;
+    max-height:0;
+    overflow:hidden;
+    transition:opacity .15s, max-height .15s, padding .15s;
+  }
+  .top-level-dropzone.active{ opacity:1; max-height:60px; padding:14px; }
+  .top-level-dropzone.drop-hover{ border-color:var(--accent); color:var(--accent); background:color-mix(in srgb, var(--accent) 12%, transparent); }
+
+  .import-toggle{
+    font-family:var(--mono); font-size:10px; color:var(--text-dim);
+    cursor:pointer; margin-bottom:12px; display:inline-block;
+  }
+  .import-toggle:hover{ color:var(--accent); }
+  .import-box{
+    background:var(--panel-2); border:1px solid var(--border); border-radius:10px;
+    padding:14px; margin-bottom:16px;
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  }
+  .import-box textarea{
+    width:100%; min-height:120px; background:var(--bg); border:1px solid var(--border);
+    border-radius:6px; color:var(--text); font-family:var(--mono); font-size:10.5px;
+    padding:10px; line-height:1.6; resize:vertical;
+  }
+  .import-box textarea:focus{ outline:none; border-color:var(--accent); }
+  .node-num{
+    font-family:var(--mono);
+    font-size:10px;
+    color:var(--text-dim);
+    flex-shrink:0;
+    text-align:right;
+    padding-top:2px;
+  }
+  .depth-0 .node-num{ font-size:11px; color:var(--accent); font-weight:600; min-width:24px; }
+
+  input.title-input{
+    flex:1;
+    background:transparent;
+    border:none;
+    border-bottom:1px solid transparent;
+    color:var(--text);
+    font-size:13px;
+    font-weight:600;
+    padding:4px 2px;
+    font-family:var(--sans);
+  }
+  input.title-input:focus{outline:none; border-bottom:1px solid var(--accent);}
+  input.title-input::placeholder{color:var(--text-dim); font-weight:400;}
+
+  input.node-input{
+    flex:1;
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:6px;
+    color:var(--text);
+    font-size:11px;
+    padding:6px 8px;
+    font-family:var(--mono);
+  }
+  input.node-input:focus{outline:none; border-color:var(--accent);}
+  input.node-input::placeholder{color:var(--text-dim);}
+
+  .children{ margin-left:26px; border-left:1px dashed var(--border); padding-left:12px; }
+
+  .icon-btn{
+    background:var(--panel-3); border:1px solid var(--border); color:var(--text-dim); cursor:pointer;
+    font-size:12px; width:28px; height:28px; border-radius:6px; line-height:1; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .icon-btn:active{transform:scale(0.94);}
+  .icon-btn:hover, .icon-btn:active{color:var(--danger); border-color:var(--danger);}
+  .icon-btn.add{color:var(--text-dim);}
+  .icon-btn.add:hover, .icon-btn.add:active{color:var(--accent); border-color:var(--accent);}
+  .icon-btn.io{color:var(--text-dim); font-size:9px; width:20px; height:20px;}
+  .icon-btn.io:hover, .icon-btn.io:active{color:var(--accent); border-color:var(--accent); transform:none;}
+  .tab .tab-io{
+    background:none; border:none; color:var(--text-dim); cursor:pointer;
+    font-size:9px; padding:0; line-height:1; opacity:0.5;
+    width:18px; height:18px; border-radius:6px;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .tab .tab-io:hover{opacity:1; color:var(--accent); background:var(--panel-3);}
+  .icon-btn.move{color:var(--text-dim); font-size:11px;}
+  .icon-btn.move:hover, .icon-btn.move:active{color:var(--accent); border-color:var(--accent); transform:none;}
+  .icon-btn.move:disabled{opacity:0.25; cursor:default;}
+  .icon-btn.move:disabled:hover{color:var(--text-dim); border-color:var(--border);}
+  .move-group{display:flex; gap:4px; flex-shrink:0;}
+
+  .primary-btn{
+    background:linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #5b8def));
+    color:#0f1115; border:none;
+    font-family:var(--sans); font-weight:600; font-size:12px;
+    padding:12px 18px; border-radius:10px; cursor:pointer; width:100%; margin-top:4px;
+    box-shadow:0 4px 16px color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+  .primary-btn:hover{opacity:0.9;}
+  [data-theme="dark"] .primary-btn{ color:#0f1115; } /* keep dark text on accent for contrast */
+
+  .ghost-btn{
+    background:none; border:1px solid var(--border); color:var(--text-dim);
+    font-family:var(--mono); font-size:10px; padding:6px 12px; border-radius:6px; cursor:pointer;
+  }
+  .ghost-btn:hover{color:var(--text); border-color:var(--text-dim);}
+
+  .preview-box{
+    background:var(--panel-2); border:1px solid var(--border); border-radius:12px;
+    padding:16px 18px; font-family:var(--mono); font-size:11.5px; line-height:1.7;
+    white-space:pre-wrap; min-height:200px; color:var(--preview-text);
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  }
+  .preview-box span{ display:block; }
+  .preview-box .d0{color:var(--preview-d0); font-weight:600;}
+  .preview-box .d1{color:var(--preview-d1);}
+  .preview-box .d2{color:var(--preview-d2);}
+  .preview-box .d3{color:var(--preview-d3);}
+  .preview-box .done-line{color:var(--done-color); font-weight:500;}
+  .preview-box .chapter-start{ margin-top:0.7em; }
+  .tree-box{ white-space:pre; overflow-x:auto; line-height:1.6; }
+
+  .preview-toggle{ display:flex; gap:4px; margin-bottom:12px; }
+  .toggle-btn{
+    background:var(--panel-2); border:1px solid var(--border); color:var(--text-dim);
+    font-family:var(--mono); font-size:10px; padding:6px 14px; border-radius:6px; cursor:pointer;
+  }
+  .toggle-btn.active{ color:#0f1115; background:var(--accent); border-color:var(--accent); font-weight:600; }
+  [data-theme="dark"] .toggle-btn.active{ color:#0f1115; }
+
+  .mindmap-box{
+    background:var(--panel-2); border:1px solid var(--border); border-radius:12px;
+    padding:12px; min-height:200px; overflow:auto; cursor:zoom-in;
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  }
+  .mindmap-box svg{ display:block; }
+
+  .mindmap-modal{
+    display:none;
+    position:fixed; inset:0; z-index:1000;
+    background:rgba(15,17,22,0.55);
+    padding:24px;
+    align-items:center;
+    justify-content:center;
+  }
+  .mindmap-modal.open{ display:flex; }
+  .mindmap-modal-inner{
+    background:var(--panel);
+    border:1px solid var(--border-strong);
+    border-radius:16px;
+    width:100%;
+    height:100%;
+    max-width:1400px;
+    overflow:hidden;
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    backdrop-filter:blur(22px);
+    -webkit-backdrop-filter:blur(22px);
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  }
+  .mindmap-modal-header{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin-bottom:12px; flex-shrink:0;
+  }
+  .mindmap-toolbar{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .mindmap-zoom-level{
+    font-family:var(--mono); font-size:10px; color:var(--text-dim);
+    min-width:46px; text-align:center;
+  }
+  .mindmap-modal-close{
+    width:36px; height:36px;
+    background:var(--panel-3);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:8px;
+    font-size:13.5px;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .mindmap-modal-close:hover{ color:var(--danger); border-color:var(--danger); }
+
+  .mindmap-viewport{
+    position:relative;
+    flex:1;
+    overflow:hidden;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:var(--panel-3);
+    cursor:grab;
+    touch-action:none;
+  }
+  .mindmap-viewport.grabbing{ cursor:grabbing; }
+  .mindmap-pan-content{
+    position:absolute;
+    top:0; left:0;
+    transform-origin:0 0;
+    will-change:transform;
+  }
+  .mindmap-pan-content svg{ display:block; }
+
+  .confirm-modal{
+    display:none;
+    position:fixed; inset:0; z-index:1100;
+    background:rgba(15,17,22,0.55);
+    padding:24px;
+    align-items:center;
+    justify-content:center;
+  }
+  .confirm-modal.open{ display:flex; }
+  .confirm-modal-inner{
+    background:var(--panel);
+    border:1px solid var(--border-strong);
+    border-radius:14px;
+    width:100%;
+    max-width:360px;
+    padding:22px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.35);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+  }
+  .confirm-modal-inner p{ margin:0 0 18px; font-size:12px; line-height:1.55; color:var(--text); }
+  .confirm-modal-actions{ display:flex; justify-content:flex-end; gap:8px; }
+  .confirm-modal-actions .confirm-modal-ok{ width:auto; margin-top:0; padding:9px 18px; }
+
+  .preview-header{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:16px; }
+  .preview-header h2{ margin:0; }
+  .preview-header-actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+  .toast{
+    font-family:var(--mono); font-size:10px; color:var(--accent);
+    align-self:center; opacity:0; transition:opacity .3s;
+  }
+  .toast.show{opacity:1;}
+  .hint{font-family:var(--mono); font-size:9.5px; color:var(--text-dim); margin-top:14px; line-height:1.7;}
+  .save-status{
+    font-family:var(--mono); font-size:9.5px; color:var(--accent);
+    opacity:0; transition:opacity .3s;
+  }
+  .save-status.show{ opacity:1; }
+  .header-actions{
+    display:flex; align-items:center; justify-content:flex-end; gap:10px; flex-wrap:wrap;
+    flex:0 1 auto;
+  }
+  .autosave-status{
+    font-family:var(--mono); font-size:9.5px; color:var(--text-dim);
+  }
+
+  /* Progress — sticky left rail (always visible while scrolling) */
+  .progress-rail{
+    position:fixed;
+    left:14px;
+    top:50%;
+    transform:translateY(-50%);
+    z-index:40;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    padding:14px 10px 12px;
+    width:56px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    backdrop-filter:blur(var(--glass-blur));
+    -webkit-backdrop-filter:blur(var(--glass-blur));
+    box-shadow:0 8px 28px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .progress-rail-kicker{
+    font-family:var(--mono);
+    font-size:9.5px;
+    letter-spacing:0.12em;
+    color:var(--text-dim);
+    writing-mode:vertical-rl;
+    transform:rotate(180deg);
+    text-transform:uppercase;
+  }
+  .progress-rail-track{
+    position:relative;
+    width:8px;
+    height:168px;
+    border-radius:99px;
+    background:var(--panel-3);
+    border:1px solid var(--border);
+    overflow:hidden;
+    flex:0 0 auto;
+  }
+  .progress-rail-fill{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:var(--pct, 0%);
+    width:100%;
+    border-radius:99px;
+    background:var(--accent);
+    transition:height .3s ease, width .3s ease;
+  }
+  .progress-rail-pct{
+    font-family:var(--mono);
+    font-size:10px;
+    font-weight:700;
+    color:var(--text);
+    letter-spacing:-0.02em;
+  }
+  .progress-rail-meta{
+    font-family:var(--mono);
+    font-size:9.5px;
+    color:var(--text-dim);
+    text-align:center;
+    line-height:1.35;
+    writing-mode:horizontal-tb;
+  }
+  .progress-rail-meta strong{ color:var(--text); font-weight:600; display:block; }
+
+  /* Progress */
+  .progress-wrap{
+    display:none;
+  }
+
+  /* Theme toggle */
+  .theme-btn{
+    background:var(--panel-3); border:1px solid var(--border); color:var(--text-dim);
+    font-size:13px; width:34px; height:34px; border-radius:8px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; line-height:1;
+  }
+  .theme-btn:hover{ color:var(--accent); border-color:var(--accent); }
+
+  .kbd-hint{
+    font-family:var(--mono); font-size:9.5px; color:var(--text-dim); margin-top:10px; line-height:1.7;
+  }
+  .kbd-hint kbd{
+    display:inline-block; background:var(--panel-3); border:1px solid var(--border);
+    border-radius:4px; padding:1px 5px; font-size:9.5px; font-family:var(--mono);
+    color:var(--text); margin:0 1px;
+  }
+</style>
+</head>
+<body>
+<aside class="progress-rail" id="progressRail" aria-label="Syllabus progress">
+  <div class="progress-rail-kicker">Progress</div>
+  <div class="progress-rail-pct" id="progressPct">0%</div>
+  <div class="progress-rail-track" title="Done vs remaining">
+    <div class="progress-rail-fill" id="progressFill" style="--pct:0%"></div>
+  </div>
+  <div class="progress-rail-meta" id="progressLabel"><strong>0</strong>/0</div>
+</aside>
+<div class="wrap">
+  <header>
+    <div class="header-titleblock">
+      <div class="kicker">DESIGNED BY</div>
+      <h1>Kiran Mothukuru</h1>
+      <p>One tab per subject, each with its own color and its own outline. Nest points as deep as you need — numbering builds itself.</p>
+    </div>
+    <div class="header-actions">
+      <button class="theme-btn" id="themeBtn" title="Toggle dark / light mode">☾</button>
+      <button class="ghost-btn" id="exportBtn">Export backup (.json)</button>
+      <button class="ghost-btn" id="importFileBtn">Import backup</button>
+      <input type="file" id="importFileInput" accept="application/json" style="display:none;">
+      <input type="file" id="importSubjectFileInput" accept="application/json" style="display:none;">
+      <button class="ghost-btn" id="autoSaveFileBtn" style="display:none;">Connect a file for auto-save</button>
+      <span class="autosave-status" id="autoSaveFileStatus"></span>
+      <div class="save-status" id="saveStatus">Saved</div>
+    </div>
+  </header>
+
+  <nav class="workspace-nav" aria-label="Workspaces and subjects">
+    <div class="tabbar tabbar-main" id="mainTabbar"></div>
+    <div class="nav-row-sub">
+      <div class="tabbar tabbar-sub" id="subTabbar"></div>
+    </div>
+  </nav>
+
+  <div class="pane-switch" id="paneSwitch">
+    <button class="toggle-btn active" data-pane="build">Build</button>
+    <button class="toggle-btn" data-pane="preview">Preview</button>
+  </div>
+
+  <div class="panes view-build">
+    <div class="pane pane-build">
+      <div class="pane-resize-handle pane-resize-handle-build" id="buildResizeHandle" title="Drag to resize Build"></div>
+      <h2>BUILD</h2>
+
+      <div class="import-toggle" id="importToggle">＋ Paste to import</div>
+      <div class="import-box" id="importBox" style="display:none;">
+        <textarea id="importInput" placeholder="Paste numbered (1. / 1.1) or indented content here…"></textarea>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <button class="ghost-btn" id="importBtn">Import (adds to this subject)</button>
+        </div>
+      </div>
+
+      <div id="chapterList"></div>
+      <div style="display:flex; gap:8px; margin-top:4px;">
+        <button class="primary-btn" id="addChapterBtn" style="margin-top:0;">+ Add Chapter</button>
+        <button class="ghost-btn" id="undoBtn" title="Undo last change (Ctrl+Z)" style="white-space:nowrap;">Undo</button>
+        <button class="ghost-btn" id="redoBtn" title="Redo (Ctrl+Shift+Z / Ctrl+Y)" style="white-space:nowrap;">Redo</button>
+        <button class="ghost-btn" id="helpBtn" title="Keyboard shortcuts and drag/drop help" style="margin-left:auto;">?</button>
+      </div>
+    </div>
+
+    <div class="pane pane-preview">
+      <div class="pane-resize-handle" id="previewResizeHandle" title="Drag to resize"></div>
+      <div class="preview-header">
+        <h2>PREVIEW</h2>
+        <div class="preview-header-actions">
+          <span class="toast" id="toast">Copied ✓</span>
+          <button class="ghost-btn" id="copyBtn">Copy as text</button>
+        </div>
+      </div>
+      <div class="preview-toggle" id="previewToggle">
+        <button class="toggle-btn active" data-mode="text">Text</button>
+        <button class="toggle-btn" data-mode="tree">Tree</button>
+        <button class="toggle-btn" data-mode="mindmap">Mind Map</button>
+      </div>
+      <div class="preview-box" id="previewBox"></div>
+      <div class="preview-box tree-box" id="treeBox" style="display:none;"></div>
+      <div class="mindmap-box" id="mindmapBox" style="display:none;" title="Tap to expand"></div>
+    </div>
+  </div>
+</div>
+
+<div class="confirm-modal" id="helpModal">
+  <div class="confirm-modal-inner" style="max-width:480px; text-align:left;">
+    <p style="font-family:var(--mono); font-size:11px; color:var(--text-dim); line-height:1.7; margin-bottom:14px;">Drag the ⠿ handle to reorder a point, or drop it into the middle of another point to nest it there. Dragging a nested point reveals a drop zone below to promote it to a main chapter. ＋ still adds a nested point, ✕ deletes. You can also drag a Main Tab or Subject tab left/right to reorder it. Drag a Subject tab up onto a Main tab to move that subject into it.</p>
+    <div class="kbd-hint" style="margin-top:0;">
+      <kbd>Tab</kbd> indent · <kbd>Shift+Tab</kbd> outdent · <kbd>Enter</kbd> sibling · <kbd>Ctrl+Enter</kbd> child · <kbd>Ctrl+D</kbd> duplicate · <kbd>Ctrl+↑↓</kbd> move · <kbd>↑↓</kbd> navigate · <kbd>Backspace</kbd> delete empty · <kbd>Ctrl+.</kbd> done · <kbd>Ctrl+Z</kbd> undo · <kbd>Ctrl+Shift+Z</kbd> redo
+    </div>
+    <div class="confirm-modal-actions" style="margin-top:18px;">
+      <button class="primary-btn confirm-modal-ok" id="helpModalClose">Got it</button>
+    </div>
+  </div>
+</div>
+
+<div class="mindmap-modal" id="mindmapModal">
+  <div class="mindmap-modal-inner">
+    <div class="mindmap-modal-header">
+      <div class="mindmap-toolbar">
+        <button class="icon-btn" id="mindmapZoomOut" title="Zoom out">−</button>
+        <span class="mindmap-zoom-level" id="mindmapZoomLevel">100%</span>
+        <button class="icon-btn" id="mindmapZoomIn" title="Zoom in">＋</button>
+        <button class="ghost-btn" id="mindmapZoomFit" title="Fit the whole map in view">Overview</button>
+        <button class="ghost-btn" id="mindmapZoomActual" title="Zoom to 100%">100%</button>
+      </div>
+      <button class="mindmap-modal-close" id="mindmapModalClose">✕</button>
+    </div>
+    <div class="mindmap-viewport" id="mindmapViewport" title="Drag to pan · scroll or +/- to zoom">
+      <div id="mindmapModalContent" class="mindmap-pan-content"></div>
+    </div>
+  </div>
+</div>
+
+<div class="confirm-modal" id="confirmModal">
+  <div class="confirm-modal-inner">
+    <p id="confirmModalMessage"></p>
+    <div class="confirm-modal-actions">
+      <button class="ghost-btn" id="confirmModalCancel">Cancel</button>
+      <button class="primary-btn confirm-modal-ok" id="confirmModalOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- COLOR PALETTE (auto-assigned per subject, in order) ----------
+const PALETTE = [
+  '#4fbdba', // teal
+  '#e8735a', // coral
+  '#5b8def', // blue
+  '#e8a23d', // amber
+  '#a45fe8', // violet
+  '#5fb878', // green
+  '#e15a97', // pink
+  '#4aa8c7', // cyan
+  '#e67e3c', // orange
+  '#9b7ede'  // purple
+];
+
+function newNode(){ return { title:'', children:[], done:false }; }
+
+// ---------- PASTE-TO-IMPORT PARSER ----------
+// Detects numbered prefixes (1. / 1.1 / 1.1.1) or, failing that, indentation /
+// bullet markers, and builds a nested tree from plain pasted text.
+function parsePastedOutline(text){
+  const rawLines = text.split('\n').filter(l => l.trim() !== '');
+  if (rawLines.length === 0) return [];
+
+  const parsedLines = rawLines.map(line => {
+    const numMatch = line.match(/^\s*(\d+(?:\.\d+)*)\.?\s+(.*)$/);
+    if (numMatch){
+      const depth = numMatch[1].split('.').length - 1;
+      return { depth, title: numMatch[2].trim(), byNumber: true };
+    }
+    return { rawLine: line, byNumber: false };
+  });
+
+  // for non-numbered lines, compute indentation depth relative to the smallest indent seen
+  const indentLines = parsedLines.filter(l => !l.byNumber);
+  if (indentLines.length){
+    const indents = indentLines.map(l => {
+      const expanded = l.rawLine.replace(/\t/g, '    ');
+      const match = expanded.match(/^(\s*)/);
+      return match[1].length;
+    });
+    const nonZero = indents.filter(n => n > 0);
+    const unit = nonZero.length ? Math.min(...nonZero) : 2;
+    let ii = 0;
+    parsedLines.forEach(l => {
+      if (l.byNumber) return;
+      const indentCount = indents[ii++];
+      const stripped = l.rawLine.trim().replace(/^[-*•·]\s*/, '');
+      l.depth = unit ? Math.round(indentCount / unit) : 0;
+      l.title = stripped;
+    });
+  }
+
+  // build tree using a depth stack
+  const root = [];
+  const stack = []; // { depth, node }
+  parsedLines.forEach(l => {
+    if (!l.title) return;
+    const node = newNode();
+    node.title = l.title;
+    while (stack.length && stack[stack.length-1].depth >= l.depth) stack.pop();
+    if (stack.length === 0){
+      root.push(node);
+    } else {
+      stack[stack.length-1].node.children.push(node);
+    }
+    stack.push({ depth: l.depth, node });
+  });
+  return root;
+}
+function newSubject(name, color){
+  return { name, color, chapters:[ newNode() ], history:[], future:[] };
+}
+function newMainTab(name){
+  return { name, subjects:[ newSubject('Subject 1', PALETTE[0]) ], activeSubIdx:0 };
+}
+
+let mainTabs = [ newMainTab('Main 1') ];
+let activeMainIdx = 0;
+
+// ---------- PERSISTENCE ----------
+const STORAGE_KEY = 'syllabus-numberer-state';
+let saveTimer = null;
+
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveState, 500);
+}
+
+// ---------- REAL-FILE AUTO-SAVE (File System Access API, Chrome/Edge desktop only) ----------
+let connectedFileHandle = null;
+const FS_SUPPORTED = 'showSaveFilePicker' in window;
+
+function openHandleDB(){
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('syllabus-numberer-fs', 1);
+    req.onupgradeneeded = () => req.result.createObjectStore('handles');
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function idbGet(key){
+  const db = await openHandleDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('handles', 'readonly');
+    const r = tx.objectStore('handles').get(key);
+    r.onsuccess = () => resolve(r.result || null);
+    r.onerror = () => reject(r.error);
+  });
+}
+async function idbSet(key, value){
+  const db = await openHandleDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('handles', 'readwrite');
+    tx.objectStore('handles').put(value, key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+function setAutoSaveStatus(text){
+  const el = document.getElementById('autoSaveFileStatus');
+  if (el) el.textContent = text;
+}
+
+async function connectAutoSaveFile(){
+  // If we already have a handle from a previous session, just re-request permission on it
+  if (connectedFileHandle){
+    try {
+      const perm = await connectedFileHandle.requestPermission({ mode: 'readwrite' });
+      if (perm === 'granted'){
+        setAutoSaveStatus(`Auto-saving to: ${connectedFileHandle.name}`);
+        await writeToConnectedFile();
+        return;
+      }
+    } catch (err){
+      console.log('Could not reuse previous handle, picking a new file.');
+    }
+  }
+  try {
+    const handle = await window.showSaveFilePicker({
+      suggestedName: 'syllabus-data.json',
+      types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }]
+    });
+    connectedFileHandle = handle;
+    await idbSet('fileHandle', handle);
+    document.getElementById('autoSaveFileBtn').textContent = 'Reconnect auto-save file';
+    setAutoSaveStatus(`Auto-saving to: ${handle.name}`);
+    await writeToConnectedFile(); // write current state immediately
+  } catch (err) {
+    if (err.name !== 'AbortError'){
+      setAutoSaveStatus('Could not connect a file (try opening this as a downloaded file, not inside chat).');
+      console.error(err);
+    }
+  }
+}
+
+async function tryRestoreFileHandle(){
+  if (!FS_SUPPORTED) return;
+  try {
+    const handle = await idbGet('fileHandle');
+    if (!handle) return;
+    connectedFileHandle = handle; // keep the reference even if permission isn't granted yet
+    const perm = await handle.queryPermission({ mode: 'readwrite' });
+    document.getElementById('autoSaveFileBtn').textContent = 'Reconnect auto-save file';
+    if (perm === 'granted'){
+      setAutoSaveStatus(`Auto-saving to: ${handle.name}`);
+    } else {
+      setAutoSaveStatus(`Click "Reconnect" to resume auto-saving to ${handle.name} (browser security requires this each session).`);
+    }
+  } catch (err){
+    console.log('No previously connected file.');
+  }
+}
+
+async function writeToConnectedFile(){
+  if (!connectedFileHandle) return;
+  try {
+    const perm = await connectedFileHandle.queryPermission({ mode: 'readwrite' });
+    if (perm !== 'granted') return; // needs a user click to reconnect; skip silently
+    const writable = await connectedFileHandle.createWritable();
+    await writable.write(JSON.stringify({ mainTabs, activeMainIdx }, null, 2));
+    await writable.close();
+    setAutoSaveStatus(`Auto-saving to: ${connectedFileHandle.name} · saved`);
+  } catch (err){
+    console.error('Auto-save file write failed:', err);
+  }
+}
+
+async function saveState(){
+  const payload = JSON.stringify({ mainTabs, activeMainIdx });
+  try {
+    if (!window.storage) throw new Error('no window.storage');
+    await window.storage.set(STORAGE_KEY, payload, false);
+    showSaveStatus('Saved');
+  } catch (err) {
+    // Not running inside a Claude artifact (e.g. opened as a downloaded file) — fall back to localStorage
+    try {
+      localStorage.setItem(STORAGE_KEY, payload);
+      showSaveStatus('Saved (local browser)');
+    } catch (err2) {
+      showSaveStatus('Save failed');
+      console.error('Storage error:', err, err2);
+    }
+  }
+  writeToConnectedFile(); // also mirror to the connected real file, if one is set up
+}
+
+async function loadState(){
+  let raw = null;
+  try {
+    if (!window.storage) throw new Error('no window.storage');
+    const result = await window.storage.get(STORAGE_KEY, false);
+    if (result && result.value) raw = result.value;
+  } catch (err) {
+    try {
+      raw = localStorage.getItem(STORAGE_KEY);
+    } catch (err2) {
+      console.log('No storage available, starting fresh.');
+    }
+  }
+  if (raw){
+    try {
+      const data = JSON.parse(raw);
+      if (data.mainTabs && data.mainTabs.length){
+        mainTabs = data.mainTabs.map(m => ({
+          name: m.name,
+          activeSubIdx: m.activeSubIdx || 0,
+          subjects: m.subjects.map(s => ({ ...s, history: [], future: [] })) // don't restore undo/redo history
+        }));
+        activeMainIdx = Math.min(data.activeMainIdx || 0, mainTabs.length - 1);
+      } else if (data.subjects && data.subjects.length){
+        // migrate old single-level save into one Main tab
+        mainTabs = [{
+          name: 'Main 1',
+          subjects: data.subjects.map(s => ({ ...s, history: [], future: [] })),
+          activeSubIdx: Math.min(data.activeIdx || 0, data.subjects.length - 1)
+        }];
+        activeMainIdx = 0;
+      }
+    } catch (err) {
+      console.log('Saved data was corrupt, starting fresh.');
+    }
+  }
+}
+
+function showSaveStatus(text){
+  const el = document.getElementById('saveStatus');
+  if (!el) return;
+  el.textContent = text;
+  el.classList.add('show');
+  clearTimeout(showSaveStatus._t);
+  showSaveStatus._t = setTimeout(() => el.classList.remove('show'), 1200);
+}
+
+function activeMain(){ return mainTabs[activeMainIdx]; }
+function activeSubject(){ const m = activeMain(); return m.subjects[m.activeSubIdx]; }
+
+function snapshot(){
+  const s = activeSubject();
+  if (!s.history) s.history = [];
+  if (!s.future) s.future = [];
+  s.history.push(JSON.parse(JSON.stringify(s.chapters)));
+  if (s.history.length > 30) s.history.shift();
+  s.future = []; // any new edit invalidates redo stack
+}
+function undo(){
+  const s = activeSubject();
+  if (!s.history || s.history.length === 0) return;
+  if (!s.future) s.future = [];
+  s.future.push(JSON.parse(JSON.stringify(s.chapters)));
+  s.chapters = s.history.pop();
+  render();
+}
+function redo(){
+  const s = activeSubject();
+  if (!s.future || s.future.length === 0) return;
+  if (!s.history) s.history = [];
+  s.history.push(JSON.parse(JSON.stringify(s.chapters)));
+  if (s.history.length > 30) s.history.shift();
+  s.chapters = s.future.pop();
+  render();
+}
+
+function focusPath(path){
+  requestAnimationFrame(() => {
+    const key = Array.isArray(path) ? path.join(',') : path;
+    const inp = document.querySelector(`input[data-path="${key}"]`);
+    if (inp){
+      inp.focus();
+      // place caret at end
+      const len = inp.value.length;
+      try { inp.setSelectionRange(len, len); } catch (_) {}
+    }
+  });
+}
+
+function moveNodeUp(path){
+  const chapters = activeSubject().chapters;
+  const parentArr = findParentArray(chapters, path);
+  const idx = path[path.length - 1];
+  if (idx <= 0) return null;
+  snapshot();
+  const tmp = parentArr[idx - 1];
+  parentArr[idx - 1] = parentArr[idx];
+  parentArr[idx] = tmp;
+  return [...path.slice(0, -1), idx - 1];
+}
+function moveNodeDown(path){
+  const chapters = activeSubject().chapters;
+  const parentArr = findParentArray(chapters, path);
+  const idx = path[path.length - 1];
+  if (idx >= parentArr.length - 1) return null;
+  snapshot();
+  const tmp = parentArr[idx + 1];
+  parentArr[idx + 1] = parentArr[idx];
+  parentArr[idx] = tmp;
+  return [...path.slice(0, -1), idx + 1];
+}
+
+/** Flat list of all visible input paths (respects collapse). */
+function collectVisiblePaths(nodes, prefix, out){
+  nodes.forEach((n, i) => {
+    const p = [...prefix, i];
+    out.push(p);
+    if (n.children && n.children.length && !n.collapsed){
+      collectVisiblePaths(n.children, p, out);
+    }
+  });
+}
+function focusAdjacent(path, dir){
+  const paths = [];
+  collectVisiblePaths(activeSubject().chapters, [], paths);
+  const key = path.join(',');
+  const idx = paths.findIndex(p => p.join(',') === key);
+  if (idx < 0) return;
+  const next = paths[idx + dir];
+  if (next) focusPath(next);
+}
+
+function findNode(chapters, path){
+  let arr = chapters, node = null;
+  for (let i=0; i<path.length; i++){ node = arr[path[i]]; arr = node.children; }
+  return node;
+}
+function findParentArray(chapters, path){
+  if (path.length === 1) return chapters;
+  return findNode(chapters, path.slice(0,-1)).children;
+}
+
+// ---------- RENDER ----------
+let previewMode = 'text';
+
+function render(){
+  document.documentElement.style.setProperty('--accent', activeSubject().color);
+  renderMainTabs();
+  renderSubTabs();
+  renderBuilder();
+  renderPreview();
+  updateProgress();
+  scheduleSave();
+}
+
+// ---------- TAB DRAG-TO-REORDER (horizontal, pointer-based so it works on touch too) ----------
+function attachTabDrag(tabEl, barEl, idx, reorderFn){
+  const THRESH = 6;
+  tabEl.addEventListener('pointerdown', e => {
+    if (e.target.closest('input, button')) return; // let renaming / delete work normally
+    const startX = e.clientX, startY = e.clientY;
+    let dragging = false;
+    let overIdx = idx;
+    tabEl.setPointerCapture(e.pointerId);
+
+    function onMove(ev){
+      if (!dragging){
+        if (Math.abs(ev.clientX - startX) < THRESH && Math.abs(ev.clientY - startY) < THRESH) return;
+        dragging = true;
+        tabEl.classList.add('tab-dragging');
+      }
+      const tabs = Array.from(barEl.querySelectorAll(':scope > .tab'));
+      overIdx = idx;
+      for (let i = 0; i < tabs.length; i++){
+        const rect = tabs[i].getBoundingClientRect();
+        if (ev.clientX >= rect.left && ev.clientX <= rect.right){ overIdx = i; break; }
+      }
+      tabs.forEach(t => t.classList.remove('tab-drop-target'));
+      if (overIdx !== idx && tabs[overIdx]) tabs[overIdx].classList.add('tab-drop-target');
+    }
+    function onUp(){
+      tabEl.removeEventListener('pointermove', onMove);
+      tabEl.removeEventListener('pointerup', onUp);
+      tabEl.removeEventListener('pointercancel', onUp);
+      tabEl.classList.remove('tab-dragging');
+      barEl.querySelectorAll('.tab').forEach(t => t.classList.remove('tab-drop-target'));
+      if (dragging && overIdx !== idx){
+        tabEl.dataset.suppressClick = '1'; // stop the upcoming click from also re-selecting the old position
+        reorderFn(idx, overIdx);
+      }
+    }
+    tabEl.addEventListener('pointermove', onMove);
+    tabEl.addEventListener('pointerup', onUp);
+    tabEl.addEventListener('pointercancel', onUp);
+  });
+}
+
+function reorderMainTabs(from, to){
+  const activeRef = mainTabs[activeMainIdx];
+  const [item] = mainTabs.splice(from, 1);
+  mainTabs.splice(to, 0, item);
+  activeMainIdx = mainTabs.indexOf(activeRef);
+  render();
+}
+
+function reorderSubTabs(from, to){
+  const m = activeMain();
+  const activeRef = m.subjects[m.activeSubIdx];
+  const [item] = m.subjects.splice(from, 1);
+  m.subjects.splice(to, 0, item);
+  m.activeSubIdx = m.subjects.indexOf(activeRef);
+  render();
+}
+
+function hitMainTabIndex(clientX, clientY){
+  const bar = document.getElementById('mainTabbar');
+  if (!bar) return -1;
+  const barRect = bar.getBoundingClientRect();
+  if (clientY < barRect.top - 8 || clientY > barRect.bottom + 8) return -1;
+  const tabs = Array.from(bar.querySelectorAll(':scope > .tab'));
+  for (let i = 0; i < tabs.length; i++){
+    const rect = tabs[i].getBoundingClientRect();
+    if (clientX >= rect.left && clientX <= rect.right) return i;
+  }
+  return -1;
+}
+
+function clearTabDropStyles(){
+  document.querySelectorAll('.tab-drop-target, .tab-drop-into').forEach(t => {
+    t.classList.remove('tab-drop-target', 'tab-drop-into');
+  });
+}
+
+function moveSubjectToMain(fromSubIdx, toMainIdx){
+  const fromMainIdx = activeMainIdx;
+  if (toMainIdx === fromMainIdx) return;
+  const fromMain = mainTabs[fromMainIdx];
+  const dest = mainTabs[toMainIdx];
+  if (!fromMain || !dest) return;
+  if (fromSubIdx < 0 || fromSubIdx >= fromMain.subjects.length) return;
+
+  const [subject] = fromMain.subjects.splice(fromSubIdx, 1);
+  dest.subjects.push(subject);
+
+  if (fromMain.subjects.length === 0){
+    fromMain.subjects.push(newSubject('Subject 1', PALETTE[fromMainIdx % PALETTE.length]));
+    fromMain.activeSubIdx = 0;
+  } else if (fromMain.activeSubIdx === fromSubIdx){
+    fromMain.activeSubIdx = Math.min(fromSubIdx, fromMain.subjects.length - 1);
+  } else if (fromMain.activeSubIdx > fromSubIdx){
+    fromMain.activeSubIdx -= 1;
+  }
+
+  activeMainIdx = toMainIdx;
+  dest.activeSubIdx = dest.subjects.length - 1;
+  render();
+}
+
+function attachSubTabDrag(tabEl, barEl, idx){
+  const THRESH = 6;
+  tabEl.addEventListener('pointerdown', e => {
+    if (e.target.closest('input, button')) return;
+    const startX = e.clientX, startY = e.clientY;
+    let dragging = false;
+    let overIdx = idx;
+    let overMainIdx = -1;
+    tabEl.setPointerCapture(e.pointerId);
+
+    function onMove(ev){
+      if (!dragging){
+        if (Math.abs(ev.clientX - startX) < THRESH && Math.abs(ev.clientY - startY) < THRESH) return;
+        dragging = true;
+        tabEl.classList.add('tab-dragging');
+      }
+      clearTabDropStyles();
+      overMainIdx = hitMainTabIndex(ev.clientX, ev.clientY);
+      if (overMainIdx >= 0){
+        overIdx = idx;
+        const mainTabsEls = document.querySelectorAll('#mainTabbar > .tab');
+        if (mainTabsEls[overMainIdx] && overMainIdx !== activeMainIdx){
+          mainTabsEls[overMainIdx].classList.add('tab-drop-into');
+        }
+        return;
+      }
+      overMainIdx = -1;
+      const tabs = Array.from(barEl.querySelectorAll(':scope > .tab'));
+      overIdx = idx;
+      for (let i = 0; i < tabs.length; i++){
+        const rect = tabs[i].getBoundingClientRect();
+        if (ev.clientX >= rect.left && ev.clientX <= rect.right &&
+            ev.clientY >= rect.top - 10 && ev.clientY <= rect.bottom + 10){
+          overIdx = i; break;
+        }
+      }
+      if (overIdx !== idx && tabs[overIdx]) tabs[overIdx].classList.add('tab-drop-target');
+    }
+    function onUp(){
+      tabEl.removeEventListener('pointermove', onMove);
+      tabEl.removeEventListener('pointerup', onUp);
+      tabEl.removeEventListener('pointercancel', onUp);
+      tabEl.classList.remove('tab-dragging');
+      clearTabDropStyles();
+      if (!dragging) return;
+      tabEl.dataset.suppressClick = '1';
+      if (overMainIdx >= 0 && overMainIdx !== activeMainIdx){
+        moveSubjectToMain(idx, overMainIdx);
+      } else if (overIdx !== idx){
+        reorderSubTabs(idx, overIdx);
+      }
+    }
+    tabEl.addEventListener('pointermove', onMove);
+    tabEl.addEventListener('pointerup', onUp);
+    tabEl.addEventListener('pointercancel', onUp);
+  });
+}
+
+function enableTabRename(input){
+  input.classList.add('editing');
+  input.focus();
+  input.select();
+}
+function disableTabRename(input){
+  input.classList.remove('editing');
+}
+
+function renderMainTabs(){
+  const bar = document.getElementById('mainTabbar');
+  bar.innerHTML = '';
+  mainTabs.forEach((m, i) => {
+    const tab = document.createElement('div');
+    tab.className = 'tab' + (i === activeMainIdx ? ' active' : '');
+    tab.innerHTML = `
+      <input class="tab-name" value="${escapeAttr(m.name)}" data-idx="${i}" size="${Math.max(m.name.length,3)}">
+      <button class="tab-del" data-idx="${i}" title="Delete main tab">✕</button>
+    `;
+    const nameInput = tab.querySelector('.tab-name');
+    nameInput.addEventListener('click', e => e.stopPropagation());
+    nameInput.addEventListener('input', e => {
+      mainTabs[i].name = e.target.value;
+      scheduleSave();
+    });
+    nameInput.addEventListener('blur', () => disableTabRename(nameInput));
+    nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') nameInput.blur(); });
+    tab.addEventListener('dblclick', e => {
+      if (e.target.closest('button')) return;
+      enableTabRename(nameInput);
+    });
+    tab.addEventListener('click', () => {
+      if (tab.dataset.suppressClick){ delete tab.dataset.suppressClick; return; }
+      if (i === activeMainIdx) return; // already the active tab; skip re-render so double-click-to-rename still works
+      activeMainIdx = i; render();
+    });
+    const delBtn = tab.querySelector('.tab-del');
+    if (delBtn) delBtn.addEventListener('click', async e => {
+      e.stopPropagation();
+      const ok = await showConfirm(`Delete "${mainTabs[i].name}" and all subjects/chapters inside it?`);
+      if (!ok) return;
+      mainTabs.splice(i, 1);
+      if (mainTabs.length === 0) mainTabs.push(newMainTab('Main 1')); // keep the app in a working state
+      if (activeMainIdx >= mainTabs.length) activeMainIdx = mainTabs.length - 1;
+      render();
+    });
+    bar.appendChild(tab);
+    attachTabDrag(tab, bar, i, reorderMainTabs);
+  });
+  const addTab = document.createElement('div');
+  addTab.className = 'tab-add';
+  addTab.textContent = '+';
+  addTab.title = 'Add workspace';
+  addTab.addEventListener('click', () => {
+    mainTabs.push(newMainTab('Main ' + (mainTabs.length+1)));
+    activeMainIdx = mainTabs.length - 1;
+    render();
+  });
+  bar.appendChild(addTab);
+
+  const addSubTab = document.createElement('div');
+  addSubTab.className = 'tab-add tab-add-subject';
+  addSubTab.textContent = '+ Subject';
+  addSubTab.title = 'Add a subject to this workspace';
+  addSubTab.addEventListener('click', () => {
+    const m = activeMain();
+    const color = PALETTE[m.subjects.length % PALETTE.length];
+    m.subjects.push(newSubject('Subject ' + (m.subjects.length+1), color));
+    m.activeSubIdx = m.subjects.length - 1;
+    render();
+  });
+  bar.appendChild(addSubTab);
+}
+
+function renderSubTabs(){
+  const bar = document.getElementById('subTabbar');
+  bar.innerHTML = '';
+  const m = activeMain();
+  m.subjects.forEach((sub, i) => {
+    const tab = document.createElement('div');
+    tab.className = 'tab' + (i === m.activeSubIdx ? ' active' : '');
+    tab.style.setProperty('--tab-color', sub.color);
+    tab.style.color = i === m.activeSubIdx ? sub.color : '';
+    tab.innerHTML = `
+      <span class="dot" style="background:${sub.color}"></span>
+      <input class="tab-name" value="${escapeAttr(sub.name)}" data-idx="${i}" size="${Math.max(sub.name.length,3)}">
+      <button class="tab-io" data-idx="${i}" data-act="export" title="Download this subject as a .json file">⬇</button>
+      <button class="tab-io" data-idx="${i}" data-act="import" title="Import a .json file into this subject only — other subjects are untouched">⬆</button>
+      <button class="tab-del" data-idx="${i}" title="Delete subject">✕</button>
+    `;
+    const nameInput = tab.querySelector('.tab-name');
+    nameInput.addEventListener('click', e => e.stopPropagation());
+    nameInput.addEventListener('input', e => {
+      sub.name = e.target.value;
+      scheduleSave();
+    });
+    nameInput.addEventListener('blur', () => disableTabRename(nameInput));
+    nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') nameInput.blur(); });
+    tab.addEventListener('dblclick', e => {
+      if (e.target.closest('button')) return;
+      enableTabRename(nameInput);
+    });
+    tab.addEventListener('click', () => {
+      if (tab.dataset.suppressClick){ delete tab.dataset.suppressClick; return; }
+      if (i === m.activeSubIdx) return; // already the active tab; skip re-render so double-click-to-rename still works
+      m.activeSubIdx = i; render();
+    });
+    const delBtn = tab.querySelector('.tab-del');
+    if (delBtn) delBtn.addEventListener('click', async e => {
+      e.stopPropagation();
+      const ok = await showConfirm(`Delete "${sub.name}" and all its chapters?`);
+      if (!ok) return;
+      m.subjects.splice(i, 1);
+      if (m.subjects.length === 0){
+        const color = PALETTE[0];
+        m.subjects.push(newSubject('Subject 1', color)); // keep the app in a working state
+      }
+      if (m.activeSubIdx >= m.subjects.length) m.activeSubIdx = m.subjects.length - 1;
+      render();
+    });
+    const exportBtnEl = tab.querySelector('[data-act="export"]');
+    exportBtnEl.addEventListener('click', e => {
+      e.stopPropagation();
+      exportSubject(sub);
+    });
+    const importBtnEl = tab.querySelector('[data-act="import"]');
+    importBtnEl.addEventListener('click', e => {
+      e.stopPropagation();
+      pendingSubjectImportIdx = i;
+      document.getElementById('importSubjectFileInput').click();
+    });
+    bar.appendChild(tab);
+    attachSubTabDrag(tab, bar, i);
+  });
+}
+
+function renderBuilder(){
+  const list = document.getElementById('chapterList');
+  list.innerHTML = '';
+  const chapters = activeSubject().chapters;
+  chapters.forEach((ch, ci) => {
+    list.appendChild(renderNode(chapters, ch, [ci], 0));
+  });
+  const dropZone = document.createElement('div');
+  dropZone.className = 'top-level-dropzone';
+  dropZone.id = 'topLevelDropzone';
+  dropZone.textContent = 'Drop here to make it a main chapter';
+  list.appendChild(dropZone);
+  attachEvents(list);
+}
+
+function renderNode(chapters, node, path, depth){
+  const numStr = path.map(p => p+1).join('.');
+  const wrapper = document.createElement('div');
+  wrapper.className = depth === 0 ? 'chapter depth-0' : 'depth-' + depth;
+
+  const hasChildren = node.children.length > 0;
+  const collapsed = !!node.collapsed;
+  const done = !!node.done;
+
+  const row = document.createElement('div');
+  row.className = 'node-row' + (done ? ' done' : '');
+  row.dataset.path = path.join(',');
+  const placeholder = depth === 0 ? 'Chapter name (e.g. Grid)' : 'Point text';
+  const inputClass = depth === 0 ? 'title-input' : 'node-input';
+  const caretHtml = hasChildren
+    ? `<button class="caret-btn" data-action="toggle-collapse" data-path="${path.join(',')}" title="${collapsed ? 'Expand' : 'Collapse'}">${collapsed ? '▸' : '▾'}</button>`
+    : `<span class="caret-spacer"></span>`;
+  row.innerHTML = `
+    <button class="done-check" data-action="toggle-done" data-path="${path.join(',')}" title="${done ? 'Mark as not done' : 'Mark as done'}">${done ? '✓' : ''}</button>
+    <span class="drag-handle" title="Drag to reorder or nest">⠿</span>
+    ${caretHtml}
+    <div class="row-main">
+      <span class="node-num">${numStr}${depth===0 ? '.' : ''}</span>
+      <input class="${inputClass}" placeholder="${placeholder}" value="${escapeAttr(node.title)}" data-path="${path.join(',')}">
+      ${collapsed ? `<span class="collapsed-count">${countDescendants(node)} hidden</span>` : ''}
+    </div>
+    <div class="row-controls">
+      <button class="icon-btn add" data-action="add-child" data-path="${path.join(',')}" title="Add nested point">＋</button>
+      <button class="icon-btn" data-action="del-node" data-path="${path.join(',')}" title="Delete">✕</button>
+    </div>
+  `;
+  wrapper.appendChild(row);
+
+  if (hasChildren && !collapsed){
+    const childWrap = document.createElement('div');
+    childWrap.className = 'children';
+    node.children.forEach((child, i) => {
+      childWrap.appendChild(renderNode(chapters, child, [...path, i], depth+1));
+    });
+    wrapper.appendChild(childWrap);
+  }
+  return wrapper;
+}
+
+function countDescendants(node){
+  let count = 0;
+  node.children.forEach(c => { count += 1 + countDescendants(c); });
+  return count;
+}
+
+function deepCloneNode(node){
+  return {
+    title: node.title,
+    done: !!node.done,
+    collapsed: !!node.collapsed,
+    children: (node.children || []).map(deepCloneNode)
+  };
+}
+
+// ---------- FILE SAVING (uses the platform's downloads capability when the
+// page is running as a published Claude artifact; falls back to the native
+// "Save As" folder picker in Chrome/Edge, or a normal browser download
+// otherwise) ----------
+async function saveFile(filename, dataStr, mime){
+  try {
+    if (window.claude && typeof window.claude.use === 'function'){
+      const downloads = await window.claude.use('downloads');
+      if (downloads){
+        await downloads.save({ filename, data: new Blob([dataStr], { type: mime || 'application/json' }) });
+        return true;
+      }
+    }
+  } catch (err){
+    if (err && err.code === 'declined') return false; // viewer said no — don't fall back
+    // any other failure (unavailable, not_granted, etc.) — fall through below
+  }
+  // Native "Save As" dialog — lets the person pick the folder and file name themselves.
+  if (FS_SUPPORTED){
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: filename,
+        types: [{ description: 'JSON', accept: { [mime || 'application/json']: ['.json'] } }]
+      });
+      const writable = await handle.createWritable();
+      await writable.write(dataStr);
+      await writable.close();
+      return true;
+    } catch (err){
+      if (err && err.name === 'AbortError') return false; // person cancelled the dialog
+      // any other failure — fall through to the plain download below
+    }
+  }
+  // Plain browser download (folder choice here depends on the browser's own
+  // "Ask where to save each file" setting — a webpage can't force that prompt).
+  const blob = new Blob([dataStr], { type: mime || 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  return true;
+}
+
+function sanitizeImportedNode(raw){
+  if (!raw || typeof raw !== 'object') return null;
+  const node = newNode();
+  node.title = typeof raw.title === 'string' ? raw.title : '';
+  node.done = !!raw.done;
+  node.collapsed = !!raw.collapsed;
+  node.children = Array.isArray(raw.children)
+    ? raw.children.map(sanitizeImportedNode).filter(Boolean)
+    : [];
+  return node;
+}
+
+// ---------- PER-SUBJECT EXPORT / IMPORT ----------
+// Downloads/imports a single subject (name, color, all its chapters) as its
+// own .json file, separate from the whole-workspace backup. Importing into a
+// subject only ever replaces that one subject — every other subject and main
+// tab is left exactly as it was.
+function exportSubject(sub){
+  const payload = JSON.stringify({
+    type: 'syllabus-subject',
+    subject: { name: sub.name, color: sub.color, chapters: sub.chapters.map(deepCloneNode) }
+  }, null, 2);
+  const safeName = (sub.name || '').trim().toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'subject';
+  const date = new Date().toISOString().slice(0, 10);
+  saveFile(`subject-${safeName}-${date}.json`, payload, 'application/json');
+}
+
+function sanitizeImportedSubject(raw, fallbackColor){
+  if (!raw || typeof raw !== 'object') return null;
+  const chaptersSrc = Array.isArray(raw.chapters) ? raw.chapters : [];
+  const chapters = chaptersSrc.map(sanitizeImportedNode).filter(Boolean);
+  return {
+    name: typeof raw.name === 'string' && raw.name.trim() ? raw.name : 'Imported subject',
+    color: typeof raw.color === 'string' && raw.color ? raw.color : fallbackColor,
+    chapters: chapters.length ? chapters : [newNode()],
+    history: [],
+    future: []
+  };
+}
+
+function indentNode(path){
+  const chapters = activeSubject().chapters;
+  if (path[path.length - 1] === 0) return null; // no previous sibling
+  const parentArr = findParentArray(chapters, path);
+  const idx = path[path.length - 1];
+  const prev = parentArr[idx - 1];
+  snapshot();
+  const [node] = parentArr.splice(idx, 1);
+  prev.children.push(node);
+  prev.collapsed = false;
+  // new path: same parent prefix, previous sibling index, last child of prev
+  return [...path.slice(0, -1), idx - 1, prev.children.length - 1];
+}
+
+function outdentNode(path){
+  const chapters = activeSubject().chapters;
+  if (path.length <= 1) return null;
+  const parentPath = path.slice(0, -1);
+  const parentArr = findParentArray(chapters, path);
+  const idx = path[path.length - 1];
+  const grandArr = findParentArray(chapters, parentPath);
+  const parentIdx = parentPath[parentPath.length - 1];
+  snapshot();
+  const [node] = parentArr.splice(idx, 1);
+  grandArr.splice(parentIdx + 1, 0, node);
+  // new path: sibling of former parent, right after it
+  return [...parentPath.slice(0, -1), parentIdx + 1];
+}
+
+function duplicateNode(path){
+  const chapters = activeSubject().chapters;
+  const parentArr = findParentArray(chapters, path);
+  const idx = path[path.length - 1];
+  const clone = deepCloneNode(parentArr[idx]);
+  if (clone.title) clone.title = clone.title + ' (copy)';
+  snapshot();
+  parentArr.splice(idx + 1, 0, clone);
+  return [...path.slice(0, -1), idx + 1];
+}
+
+function countProgress(nodes){
+  let total = 0, done = 0;
+  function walk(list){
+    list.forEach(n => {
+      total += 1;
+      if (n.done) done += 1;
+      if (n.children && n.children.length) walk(n.children);
+    });
+  }
+  walk(nodes);
+  return { total, done };
+}
+
+function updateProgress(){
+  const { total, done } = countProgress(activeSubject().chapters);
+  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+  const fill = document.getElementById('progressFill');
+  const label = document.getElementById('progressLabel');
+  const pctEl = document.getElementById('progressPct');
+  const rail = document.getElementById('progressRail');
+  if (fill) fill.style.setProperty('--pct', pct + '%');
+  if (pctEl) pctEl.textContent = pct + '%';
+  if (label) label.innerHTML = `<strong>${done}</strong>/${total}`;
+  if (rail) rail.title = `${pct}% complete · ${done} of ${total} done`;
+}
+
+function attachEvents(list){
+  const chapters = activeSubject().chapters;
+  list.querySelectorAll('input[data-path]').forEach(el => {
+    el.addEventListener('input', e => {
+      const path = e.target.dataset.path.split(',').map(Number);
+      findNode(chapters, path).title = e.target.value;
+      renderPreview();
+      scheduleSave();
+    });
+    el.addEventListener('keydown', e => {
+      const path = e.target.dataset.path.split(',').map(Number);
+      const mod = e.ctrlKey || e.metaKey;
+
+      // Tab / Shift+Tab → indent / outdent
+      if (e.key === 'Tab'){
+        e.preventDefault();
+        const newPath = e.shiftKey ? outdentNode(path) : indentNode(path);
+        if (newPath){
+          render();
+          focusPath(newPath);
+        }
+        return;
+      }
+
+      // Enter → sibling, Ctrl/Cmd+Enter → child
+      if (e.key === 'Enter' && !e.shiftKey){
+        e.preventDefault();
+        if (mod){
+          snapshot();
+          const node = findNode(chapters, path);
+          node.children.push(newNode());
+          node.collapsed = false;
+          render();
+          focusPath([...path, node.children.length - 1]);
+        } else {
+          snapshot();
+          const parentArr = findParentArray(chapters, path);
+          const idx = path[path.length - 1];
+          parentArr.splice(idx + 1, 0, newNode());
+          render();
+          focusPath([...path.slice(0, -1), idx + 1]);
+        }
+        return;
+      }
+
+      // Ctrl/Cmd+D → duplicate
+      if (mod && e.key.toLowerCase() === 'd'){
+        e.preventDefault();
+        const newPath = duplicateNode(path);
+        if (newPath){
+          render();
+          focusPath(newPath);
+        }
+        return;
+      }
+
+      // Ctrl/Cmd+↑ / ↓ → move among siblings
+      if (mod && (e.key === 'ArrowUp' || e.key === 'ArrowDown')){
+        e.preventDefault();
+        const newPath = e.key === 'ArrowUp' ? moveNodeUp(path) : moveNodeDown(path);
+        if (newPath){
+          render();
+          focusPath(newPath);
+        }
+        return;
+      }
+
+      // Plain ↑ / ↓ → navigate between visible inputs
+      if (!mod && !e.shiftKey && !e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')){
+        // only intercept when caret is at edge so normal text editing still works mid-line
+        const input = e.target;
+        const atStart = input.selectionStart === 0 && input.selectionEnd === 0;
+        const atEnd = input.selectionStart === input.value.length && input.selectionEnd === input.value.length;
+        if ((e.key === 'ArrowUp' && atStart) || (e.key === 'ArrowDown' && atEnd)){
+          e.preventDefault();
+          focusAdjacent(path, e.key === 'ArrowUp' ? -1 : 1);
+        }
+        return;
+      }
+
+      // Backspace on empty node → delete (if no children)
+      if (e.key === 'Backspace' && e.target.value === '' && !mod){
+        const node = findNode(chapters, path);
+        if (node && (!node.children || node.children.length === 0)){
+          e.preventDefault();
+          const parentArr = findParentArray(chapters, path);
+          snapshot();
+          const idx = path[path.length - 1];
+          parentArr.splice(idx, 1);
+          if (chapters.length === 0) chapters.push(newNode());
+          render();
+          // focus previous sibling, or parent, or first remaining
+          let focusTarget = null;
+          if (idx > 0) focusTarget = [...path.slice(0, -1), idx - 1];
+          else if (path.length > 1) focusTarget = path.slice(0, -1);
+          else if (chapters.length) focusTarget = [0];
+          if (focusTarget) focusPath(focusTarget);
+        }
+        return;
+      }
+
+      // Ctrl/Cmd+Enter already handled; Ctrl/Cmd+. → toggle done
+      if (mod && e.key === '.'){
+        e.preventDefault();
+        const node = findNode(chapters, path);
+        if (node){
+          node.done = !node.done;
+          renderBuilder();
+          updateProgress();
+          scheduleSave();
+          focusPath(path);
+        }
+        return;
+      }
+    });
+  });
+  list.querySelectorAll('[data-action="add-child"]').forEach(el => {
+    el.addEventListener('click', e => {
+      snapshot();
+      const path = e.currentTarget.dataset.path.split(',').map(Number);
+      const node = findNode(chapters, path);
+      node.children.push(newNode());
+      node.collapsed = false;
+      render();
+      focusPath([...path, node.children.length - 1]);
+    });
+  });
+  list.querySelectorAll('[data-action="del-node"]').forEach(el => {
+    el.addEventListener('click', async e => {
+      const path = e.currentTarget.dataset.path.split(',').map(Number);
+      const node = findNode(chapters, path);
+      const label = node.title.trim() || (path.length === 1 ? '(untitled chapter)' : '(untitled point)');
+      const kidCount = node.children ? node.children.length : 0;
+      const msg = kidCount > 0
+        ? `Delete "${label}" and its ${kidCount} nested point${kidCount > 1 ? 's' : ''}?`
+        : `Delete "${label}"?`;
+      const ok = await showConfirm(msg);
+      if (!ok) return;
+      snapshot();
+      const arr = findParentArray(chapters, path);
+      arr.splice(path[path.length-1], 1);
+      if (chapters.length === 0) chapters.push(newNode());
+      render();
+    });
+  });
+  list.querySelectorAll('.drag-handle').forEach(el => {
+    el.addEventListener('pointerdown', onDragStart);
+  });
+  list.querySelectorAll('[data-action="toggle-collapse"]').forEach(el => {
+    el.addEventListener('click', e => {
+      const path = e.currentTarget.dataset.path.split(',').map(Number);
+      const node = findNode(chapters, path);
+      node.collapsed = !node.collapsed;
+      renderBuilder();
+      scheduleSave();
+    });
+  });
+  list.querySelectorAll('[data-action="toggle-done"]').forEach(el => {
+    el.addEventListener('click', e => {
+      const path = e.currentTarget.dataset.path.split(',').map(Number);
+      const node = findNode(chapters, path);
+      node.done = !node.done;
+      renderBuilder();
+      updateProgress();
+      scheduleSave();
+    });
+  });
+}
+
+// ---------- DRAG AND DROP ----------
+let dragState = null; // { path, sourceEl, pointerId }
+let hoverInfo = null; // { path, zone: 'before'|'after'|'into' }
+let pendingSubjectImportIdx = null; // index of the subject awaiting a per-subject import
+
+function onDragStart(e){
+  e.preventDefault();
+  const row = e.currentTarget.closest('.node-row');
+  const path = row.dataset.path.split(',').map(Number);
+  dragState = { path, sourceEl: row, pointerId: e.pointerId };
+  row.classList.add('dragging');
+  row.setPointerCapture(e.pointerId);
+  row.addEventListener('pointermove', onDragMove);
+  row.addEventListener('pointerup', onDragEnd);
+  row.addEventListener('pointercancel', onDragEnd);
+  const dz = document.getElementById('topLevelDropzone');
+  if (dz && path.length > 1) dz.classList.add('active'); // only show for nested points, not chapters already at top level
+}
+
+function isDescendantOrSelf(sourcePath, targetPath){
+  if (targetPath.length < sourcePath.length) return false;
+  return sourcePath.every((v,i) => targetPath[i] === v);
+}
+
+function onDragMove(e){
+  if (!dragState) return;
+  clearHoverStyles();
+
+  const dz = document.getElementById('topLevelDropzone');
+  if (dz && dz.classList.contains('active')){
+    const dzRect = dz.getBoundingClientRect();
+    if (e.clientY >= dzRect.top && e.clientY <= dzRect.bottom){
+      hoverInfo = { topLevel: true };
+      dz.classList.add('drop-hover');
+      return;
+    }
+  }
+
+  const list = document.getElementById('chapterList');
+  const rows = Array.from(list.querySelectorAll('.node-row'));
+  let target = null;
+  for (const row of rows){
+    const rect = row.getBoundingClientRect();
+    if (e.clientY >= rect.top && e.clientY <= rect.bottom){ target = row; break; }
+  }
+  if (!target){
+    hoverInfo = null;
+    return;
+  }
+  const targetPath = target.dataset.path.split(',').map(Number);
+  if (isDescendantOrSelf(dragState.path, targetPath)){
+    hoverInfo = null;
+    return;
+  }
+  const rect = target.getBoundingClientRect();
+  const relY = (e.clientY - rect.top) / rect.height;
+  let zone;
+  if (relY < 0.28) zone = 'before';
+  else if (relY > 0.72) zone = 'after';
+  else zone = 'into';
+  hoverInfo = { path: targetPath, zone };
+  target.classList.add('drop-' + zone);
+}
+
+function clearHoverStyles(){
+  document.querySelectorAll('.drop-before, .drop-after, .drop-into').forEach(el => {
+    el.classList.remove('drop-before','drop-after','drop-into');
+  });
+  const dz = document.getElementById('topLevelDropzone');
+  if (dz) dz.classList.remove('drop-hover');
+}
+
+function onDragEnd(e){
+  if (!dragState) return;
+  const { sourceEl, path } = dragState;
+  sourceEl.classList.remove('dragging');
+  sourceEl.removeEventListener('pointermove', onDragMove);
+  sourceEl.removeEventListener('pointerup', onDragEnd);
+  sourceEl.removeEventListener('pointercancel', onDragEnd);
+  clearHoverStyles();
+  const dz = document.getElementById('topLevelDropzone');
+  if (dz) dz.classList.remove('active');
+
+  const chapters = activeSubject().chapters;
+  if (hoverInfo && hoverInfo.topLevel){
+    snapshot();
+    const sourceArr = findParentArray(chapters, path);
+    const [node] = sourceArr.splice(path[path.length-1], 1);
+    chapters.push(node); // becomes a new main chapter at the end
+    render();
+  } else if (hoverInfo){
+    snapshot();
+    const sourceArr = findParentArray(chapters, path);
+    const sourceIdx = path[path.length-1];
+    const [node] = sourceArr.splice(sourceIdx, 1);
+
+    // re-resolve target path since removal may have shifted indices ahead of it
+    let targetPath = hoverInfo.path.slice();
+    if (targetPath.length === path.length && arraysEqualPrefix(targetPath, path, path.length-1) && targetPath[targetPath.length-1] > sourceIdx){
+      targetPath[targetPath.length-1] -= 1;
+    }
+
+    if (hoverInfo.zone === 'into'){
+      findNode(chapters, targetPath).children.push(node);
+    } else {
+      const targetArr = findParentArray(chapters, targetPath);
+      let insertAt = targetPath[targetPath.length-1];
+      if (hoverInfo.zone === 'after') insertAt += 1;
+      targetArr.splice(insertAt, 0, node);
+    }
+    render();
+  }
+  dragState = null;
+  hoverInfo = null;
+}
+
+function arraysEqualPrefix(a, b, len){
+  for (let i=0; i<len; i++) if (a[i] !== b[i]) return false;
+  return true;
+}
+
+function renderPreview(){
+  document.getElementById('previewBox').style.display = 'none';
+  document.getElementById('treeBox').style.display = 'none';
+  document.getElementById('mindmapBox').style.display = 'none';
+  if (previewMode === 'text'){
+    document.getElementById('previewBox').style.display = '';
+    renderTextPreview();
+  } else if (previewMode === 'tree'){
+    document.getElementById('treeBox').style.display = '';
+    renderTreePreview();
+  } else {
+    document.getElementById('mindmapBox').style.display = '';
+    renderMindMap();
+  }
+}
+
+// ---------- TREE (branch-line) PREVIEW ----------
+// Builds classic ├── / └── / │   connector lines so nesting is visually obvious.
+function buildTreeLines(nodes, parts, depth, prefix){
+  let lines = [];
+  nodes.forEach((node, i) => {
+    const num = [...parts, i + 1];
+    const numStr = num.join('.');
+    const title = node.title.trim() || (depth === 0 ? '(untitled chapter)' : '(untitled point)');
+    const dot = depth === 0 ? '.' : '';
+    const isLast = i === nodes.length - 1;
+    let text;
+    if (depth === 0){
+      text = `${numStr}${dot} ${title}`;
+    } else {
+      const connector = isLast ? '└── ' : '├── ';
+      text = `${prefix}${connector}${numStr} ${title}`;
+    }
+    const cls = (node.done ? 'done-line' : 'd' + Math.min(depth, 3))
+      + (depth === 0 && i > 0 ? ' chapter-start' : '');
+    lines.push({ text, cls });
+    if (node.children.length){
+      const childPrefix = depth === 0 ? '' : prefix + (isLast ? '    ' : '│   ');
+      lines = lines.concat(buildTreeLines(node.children, num, depth + 1, childPrefix));
+    }
+  });
+  return lines;
+}
+
+function renderTreePreview(){
+  const box = document.getElementById('treeBox');
+  const chapters = activeSubject().chapters;
+  const lines = buildTreeLines(chapters, [], 0, '');
+  const html = lines.map(l => `<span class="${l.cls}">${escapeHtml(l.text)}</span>`).join('');
+  box.innerHTML = html.trim() || '<span class="d2">Start typing on the left…</span>';
+}
+
+function renderTextPreview(){
+  const box = document.getElementById('previewBox');
+  const chapters = activeSubject().chapters;
+  let html = '';
+  function walk(nodes, prefixParts, depth){
+    nodes.forEach((node, i) => {
+      const parts = [...prefixParts, i+1];
+      const numStr = parts.join('.');
+      const title = node.title.trim() || (depth===0 ? '(untitled chapter)' : '(untitled point)');
+      const indent = '   '.repeat(depth);
+      const cls = (node.done ? 'done-line' : 'd' + Math.min(depth,3))
+        + (depth === 0 && i > 0 ? ' chapter-start' : '');
+      const dot = depth === 0 ? '.' : '';
+      html += `<span class="${cls}">${indent}${numStr}${dot} ${escapeHtml(title)}</span>`;
+      if (node.children.length) walk(node.children, parts, depth+1);
+    });
+  }
+  walk(chapters, [], 0);
+  box.innerHTML = html.trim() || '<span class="d2">Start typing on the left…</span>';
+}
+
+// ---------- MIND MAP ----------
+function renderMindMap(targetId, scale){
+  targetId = targetId || 'mindmapBox';
+  scale = scale || 1;
+  const container = document.getElementById(targetId);
+  const chapters = activeSubject().chapters;
+  const accent = activeSubject().color;
+
+  // flatten to measure text widths per depth column
+  const flat = [];
+  function collect(nodes, parts, depth){
+    nodes.forEach((node, i) => {
+      const numStr = [...parts, i+1].join('.');
+      const title = node.title.trim() || (depth===0 ? '(untitled chapter)' : '(untitled point)');
+      flat.push({ node, depth, label: numStr + (depth===0?'. ':' ') + title });
+      if (node.children.length) collect(node.children, [...parts, i+1], depth+1);
+    });
+  }
+  collect(chapters, [], 0);
+
+  if (flat.length === 0 || (flat.length === 1 && !flat[0].node.title.trim())){
+    container.innerHTML = '<span style="font-family:var(--mono); font-size:12px; color:var(--text-dim);">Start typing on the left…</span>';
+    return;
+  }
+
+  // measure text width using canvas
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const maxDepth = Math.max(...flat.map(f => f.depth));
+  const colTextWidth = new Array(maxDepth+1).fill(0);
+  flat.forEach(f => {
+    ctx.font = f.depth === 0 ? `700 ${14*scale}px Inter` : `500 ${12*scale}px "JetBrains Mono"`;
+    const w = ctx.measureText(f.label).width;
+    if (w > colTextWidth[f.depth]) colTextWidth[f.depth] = w;
+  });
+  const NODE_PAD = 30 * scale; // dot + gap
+  const COL_GAP = 46 * scale;
+  const colX = [24 * scale];
+  for (let d=1; d<=maxDepth; d++){
+    colX.push(colX[d-1] + colTextWidth[d-1] + NODE_PAD + COL_GAP);
+  }
+
+  const ROW_H = 30 * scale;
+  let cursorY = 0;
+  const positioned = [];
+  const edges = [];
+
+  function layout(node, depth, parts){
+    if (node.children.length === 0){
+      const y = cursorY * ROW_H + ROW_H/2;
+      cursorY += 1;
+      const numStr = parts.join('.');
+      const title = node.title.trim() || (depth===0?'(untitled chapter)':'(untitled point)');
+      positioned.push({ x: colX[depth], y, depth, label: numStr + (depth===0?'. ':' ') + title, done: !!node.done });
+      return y;
+    }
+    const childYs = node.children.map((c,i) => layout(c, depth+1, [...parts, i+1]));
+    const y = (childYs[0] + childYs[childYs.length-1]) / 2;
+    const numStr = parts.join('.');
+    const title = node.title.trim() || (depth===0?'(untitled chapter)':'(untitled point)');
+    positioned.push({ x: colX[depth], y, depth, label: numStr + (depth===0?'. ':' ') + title, done: !!node.done });
+    childYs.forEach((cy, i) => {
+      edges.push({ x1: colX[depth], y1: y, x2: colX[depth+1], y2: cy });
+    });
+    return y;
+  }
+  chapters.forEach((ch, i) => layout(ch, 0, [i+1]));
+
+  const totalHeight = cursorY * ROW_H + 20;
+  const totalWidth = colX[maxDepth] + colTextWidth[maxDepth] + 40;
+
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const depthColors = isDark
+    ? [accent, '#c8cdd6', '#9ca3af', '#7a8494']
+    : [accent, '#3a3f4a', '#6b7280', '#8b93a1'];
+  const DONE_COLOR = isDark ? '#34d399' : '#0f9d58';
+  const edgeColor = isDark ? '#4b5563' : '#c8cdd4';
+  const rootText = isDark ? '#e8eaef' : '#20232b';
+
+  let svg = `<svg width="${totalWidth}" height="${totalHeight}" viewBox="0 0 ${totalWidth} ${totalHeight}" xmlns="http://www.w3.org/2000/svg">`;
+  edges.forEach(e => {
+    const midX = (e.x1 + e.x2) / 2;
+    svg += `<path d="M ${e.x1} ${e.y1} C ${midX} ${e.y1}, ${midX} ${e.y2}, ${e.x2} ${e.y2}" fill="none" stroke="${edgeColor}" stroke-width="1.5"/>`;
+  });
+  positioned.forEach(p => {
+    const color = p.done ? DONE_COLOR : depthColors[Math.min(p.depth, 3)];
+    const r = (p.depth === 0 ? 5 : 3.5) * scale;
+    const fontWeight = p.depth === 0 ? '700' : '500';
+    const fontSize = (p.depth === 0 ? 14 : 12) * scale;
+    const fontFamily = p.depth === 0 ? 'Inter' : 'JetBrains Mono';
+    const textColor = p.done ? DONE_COLOR : (p.depth===0 ? rootText : color);
+    svg += `<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${color}"/>`;
+    svg += `<text x="${p.x + 12*scale}" y="${p.y}" dominant-baseline="middle" font-family="${fontFamily}" font-size="${fontSize}" font-weight="${fontWeight}" fill="${textColor}">${escapeHtml(p.label)}</text>`;
+  });
+  svg += '</svg>';
+  container.innerHTML = svg;
+}
+
+function plainText(){
+  const chapters = activeSubject().chapters;
+  let out = '';
+  function walk(nodes, prefixParts, depth){
+    nodes.forEach((node, i) => {
+      if (depth === 0 && i > 0) out += '\n';
+      const parts = [...prefixParts, i+1];
+      const numStr = parts.join('.');
+      const title = node.title.trim() || (depth===0 ? '(untitled chapter)' : '(untitled point)');
+      const indent = '   '.repeat(depth);
+      const dot = depth === 0 ? '.' : '';
+      out += `${indent}${numStr}${dot} ${title}\n`;
+      if (node.children.length) walk(node.children, parts, depth+1);
+    });
+  }
+  walk(chapters, [], 0);
+  return out.trim();
+}
+
+function treeText(){
+  const chapters = activeSubject().chapters;
+  return buildTreeLines(chapters, [], 0, '').map(l => l.text).join('\n').trim();
+}
+
+function escapeHtml(str){ return str.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function escapeAttr(str){ return String(str).replace(/"/g, '&quot;'); }
+
+// ---------- CUSTOM CONFIRM/ALERT (native confirm()/alert() are blocked inside the sandboxed artifact frame) ----------
+function showConfirm(message){
+  return new Promise(resolve => {
+    const modal = document.getElementById('confirmModal');
+    const okBtn = document.getElementById('confirmModalOk');
+    const cancelBtn = document.getElementById('confirmModalCancel');
+    document.getElementById('confirmModalMessage').textContent = message;
+    cancelBtn.style.display = '';
+    okBtn.textContent = 'Delete';
+    modal.classList.add('open');
+    function cleanup(result){
+      modal.classList.remove('open');
+      okBtn.removeEventListener('click', onOk);
+      cancelBtn.removeEventListener('click', onCancel);
+      modal.removeEventListener('click', onBackdrop);
+      resolve(result);
+    }
+    function onOk(){ cleanup(true); }
+    function onCancel(){ cleanup(false); }
+    function onBackdrop(e){ if (e.target === modal) cleanup(false); }
+    okBtn.addEventListener('click', onOk);
+    cancelBtn.addEventListener('click', onCancel);
+    modal.addEventListener('click', onBackdrop);
+  });
+}
+
+function showAlert(message){
+  return new Promise(resolve => {
+    const modal = document.getElementById('confirmModal');
+    const okBtn = document.getElementById('confirmModalOk');
+    const cancelBtn = document.getElementById('confirmModalCancel');
+    document.getElementById('confirmModalMessage').textContent = message;
+    cancelBtn.style.display = 'none';
+    okBtn.textContent = 'OK';
+    modal.classList.add('open');
+    function cleanup(){
+      modal.classList.remove('open');
+      okBtn.removeEventListener('click', onOk);
+      modal.removeEventListener('click', onBackdrop);
+      cancelBtn.style.display = '';
+      resolve();
+    }
+    function onOk(){ cleanup(); }
+    function onBackdrop(e){ if (e.target === modal) cleanup(); }
+    okBtn.addEventListener('click', onOk);
+    modal.addEventListener('click', onBackdrop);
+  });
+}
+
+document.getElementById('addChapterBtn').addEventListener('click', () => {
+  snapshot();
+  activeSubject().chapters.push(newNode());
+  render();
+  const titles = document.querySelectorAll('.title-input');
+  titles[titles.length-1].focus();
+});
+
+document.getElementById('undoBtn').addEventListener('click', undo);
+document.getElementById('redoBtn').addEventListener('click', redo);
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const payload = JSON.stringify({ mainTabs, activeMainIdx }, null, 2);
+  const date = new Date().toISOString().slice(0,10);
+  saveFile(`syllabus-backup-${date}.json`, payload, 'application/json');
+});
+
+document.getElementById('importFileBtn').addEventListener('click', () => {
+  document.getElementById('importFileInput').click();
+});
+
+document.getElementById('importFileInput').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async evt => {
+    try {
+      const data = JSON.parse(evt.target.result);
+      let newMainTabs = null, newActiveMainIdx = 0;
+      if (data.mainTabs && Array.isArray(data.mainTabs) && data.mainTabs.length){
+        newMainTabs = data.mainTabs.map(m => ({
+          name: m.name,
+          activeSubIdx: m.activeSubIdx || 0,
+          subjects: m.subjects.map(s => ({ ...s, history: [], future: [] }))
+        }));
+        newActiveMainIdx = Math.min(data.activeMainIdx || 0, newMainTabs.length - 1);
+      } else if (data.subjects && Array.isArray(data.subjects) && data.subjects.length){
+        newMainTabs = [{
+          name: 'Main 1',
+          subjects: data.subjects.map(s => ({ ...s, history: [], future: [] })),
+          activeSubIdx: Math.min(data.activeIdx || 0, data.subjects.length - 1)
+        }];
+        newActiveMainIdx = 0;
+      } else {
+        await showAlert('That file doesn\'t look like a valid backup.');
+        return;
+      }
+      const ok = await showConfirm('This will replace everything currently in the tool with the backup file. Continue?');
+      if (!ok) return;
+      mainTabs = newMainTabs;
+      activeMainIdx = newActiveMainIdx;
+      render();
+    } catch (err){
+      await showAlert('Could not read that file — it may be corrupted or not a backup from this tool.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = ''; // allow re-selecting the same file later
+});
+
+document.getElementById('importSubjectFileInput').addEventListener('change', e => {
+  const file = e.target.files[0];
+  const targetIdx = pendingSubjectImportIdx;
+  pendingSubjectImportIdx = null;
+  if (!file || targetIdx === null) return;
+  const reader = new FileReader();
+  reader.onload = async evt => {
+    try {
+      const data = JSON.parse(evt.target.result);
+      const raw = (data && data.type === 'syllabus-subject' && data.subject) ? data.subject
+                : (data && typeof data.name === 'string' && Array.isArray(data.chapters)) ? data
+                : null;
+      if (!raw){
+        await showAlert('That file doesn\'t look like an exported subject.');
+        return;
+      }
+      const m = activeMain();
+      const existing = m.subjects[targetIdx];
+      if (!existing) return;
+      const label = existing.name.trim() || '(untitled subject)';
+      const ok = await showConfirm(`Replace "${label}" with the imported subject? Your other subjects won't be affected.`);
+      if (!ok) return;
+      const sanitized = sanitizeImportedSubject(raw, existing.color);
+      m.subjects[targetIdx] = sanitized;
+      m.activeSubIdx = targetIdx;
+      render();
+    } catch (err){
+      await showAlert('Could not read that file — it may be corrupted or not an exported subject.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+document.addEventListener('keydown', e => {
+  if (!(e.ctrlKey || e.metaKey)) return;
+  const key = e.key.toLowerCase();
+  // Ctrl/Cmd+Z → undo structure (works even while an input is focused)
+  if (key === 'z' && !e.shiftKey){
+    e.preventDefault();
+    undo();
+    return;
+  }
+  // Ctrl/Cmd+Shift+Z or Ctrl/Cmd+Y → redo
+  if ((key === 'z' && e.shiftKey) || key === 'y'){
+    e.preventDefault();
+    redo();
+    return;
+  }
+});
+
+document.getElementById('importToggle').addEventListener('click', () => {
+  const box = document.getElementById('importBox');
+  box.style.display = box.style.display === 'none' ? '' : 'none';
+});
+
+document.getElementById('importBtn').addEventListener('click', () => {
+  const text = document.getElementById('importInput').value;
+  const parsed = parsePastedOutline(text);
+  if (parsed.length === 0) return;
+  snapshot();
+  const sub = activeSubject();
+  const onlyBlankChapter = sub.chapters.length === 1 && !sub.chapters[0].title.trim() && sub.chapters[0].children.length === 0;
+  if (onlyBlankChapter){
+    sub.chapters = parsed;
+  } else {
+    sub.chapters.push(...parsed);
+  }
+  document.getElementById('importInput').value = '';
+  document.getElementById('importBox').style.display = 'none';
+  render();
+});
+
+document.querySelectorAll('#previewToggle .toggle-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    previewMode = btn.dataset.mode;
+    document.querySelectorAll('#previewToggle .toggle-btn').forEach(b => b.classList.toggle('active', b === btn));
+    renderPreview();
+    document.getElementById('copyBtn').textContent = previewMode === 'tree' ? 'Copy as tree' : 'Copy as text';
+  });
+});
+
+// ---------- MIND MAP ZOOM & PAN (used inside the maximized modal) ----------
+let mmZoom = 1;
+let mmPanX = 0;
+let mmPanY = 0;
+const MM_MIN_ZOOM = 0.15;
+const MM_MAX_ZOOM = 4;
+
+function getModalSvgSize(){
+  const svg = document.querySelector('#mindmapModalContent svg');
+  if (!svg) return { w: 0, h: 0 };
+  return { w: parseFloat(svg.getAttribute('width')) || 0, h: parseFloat(svg.getAttribute('height')) || 0 };
+}
+
+function applyMindmapTransform(){
+  const content = document.getElementById('mindmapModalContent');
+  content.style.transform = `translate(${mmPanX}px, ${mmPanY}px) scale(${mmZoom})`;
+  const lvl = document.getElementById('mindmapZoomLevel');
+  if (lvl) lvl.textContent = Math.round(mmZoom * 100) + '%';
+}
+
+function mindmapFitToView(){
+  const { w, h } = getModalSvgSize();
+  if (!w || !h) return;
+  const viewport = document.getElementById('mindmapViewport');
+  const vpRect = viewport.getBoundingClientRect();
+  const pad = 32;
+  const scaleX = (vpRect.width - pad) / w;
+  const scaleY = (vpRect.height - pad) / h;
+  mmZoom = Math.max(MM_MIN_ZOOM, Math.min(scaleX, scaleY));
+  mmPanX = (vpRect.width - w * mmZoom) / 2;
+  mmPanY = (vpRect.height - h * mmZoom) / 2;
+  applyMindmapTransform();
+}
+
+function mindmapZoomActual(){
+  const { w, h } = getModalSvgSize();
+  const viewport = document.getElementById('mindmapViewport');
+  const vpRect = viewport.getBoundingClientRect();
+  mmZoom = 1;
+  mmPanX = (vpRect.width - w) / 2;
+  mmPanY = (vpRect.height - h) / 2;
+  applyMindmapTransform();
+}
+
+function mindmapZoomBy(factor, clientX, clientY){
+  const viewport = document.getElementById('mindmapViewport');
+  const vpRect = viewport.getBoundingClientRect();
+  const cx = clientX != null ? clientX - vpRect.left : vpRect.width / 2;
+  const cy = clientY != null ? clientY - vpRect.top : vpRect.height / 2;
+  const newZoom = Math.max(MM_MIN_ZOOM, Math.min(MM_MAX_ZOOM, mmZoom * factor));
+  // keep whatever point is under the cursor (or center) fixed in place while zooming
+  const contentX = (cx - mmPanX) / mmZoom;
+  const contentY = (cy - mmPanY) / mmZoom;
+  mmPanX = cx - contentX * newZoom;
+  mmPanY = cy - contentY * newZoom;
+  mmZoom = newZoom;
+  applyMindmapTransform();
+}
+
+function setupMindmapPan(){
+  const viewport = document.getElementById('mindmapViewport');
+  viewport.addEventListener('pointerdown', e => {
+    if (e.target.closest('button')) return;
+    const startX = e.clientX, startY = e.clientY;
+    const originX = mmPanX, originY = mmPanY;
+    viewport.classList.add('grabbing');
+    viewport.setPointerCapture(e.pointerId);
+    function onMove(ev){
+      mmPanX = originX + (ev.clientX - startX);
+      mmPanY = originY + (ev.clientY - startY);
+      applyMindmapTransform();
+    }
+    function onUp(){
+      viewport.classList.remove('grabbing');
+      viewport.removeEventListener('pointermove', onMove);
+      viewport.removeEventListener('pointerup', onUp);
+      viewport.removeEventListener('pointercancel', onUp);
+    }
+    viewport.addEventListener('pointermove', onMove);
+    viewport.addEventListener('pointerup', onUp);
+    viewport.addEventListener('pointercancel', onUp);
+  });
+  viewport.addEventListener('wheel', e => {
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+    mindmapZoomBy(factor, e.clientX, e.clientY);
+  }, { passive: false });
+}
+setupMindmapPan();
+
+document.getElementById('mindmapBox').addEventListener('click', () => {
+  renderMindMap('mindmapModalContent', 1);
+  document.getElementById('mindmapModal').classList.add('open');
+  // wait a frame so the modal has its final on-screen size before we compute the fit
+  requestAnimationFrame(() => requestAnimationFrame(mindmapFitToView));
+});
+document.getElementById('mindmapModalClose').addEventListener('click', () => {
+  document.getElementById('mindmapModal').classList.remove('open');
+});
+document.getElementById('mindmapModal').addEventListener('click', e => {
+  if (e.target.id === 'mindmapModal') document.getElementById('mindmapModal').classList.remove('open');
+});
+document.getElementById('mindmapZoomIn').addEventListener('click', () => mindmapZoomBy(1.25));
+document.getElementById('mindmapZoomOut').addEventListener('click', () => mindmapZoomBy(1 / 1.25));
+document.getElementById('mindmapZoomFit').addEventListener('click', mindmapFitToView);
+document.getElementById('mindmapZoomActual').addEventListener('click', mindmapZoomActual);
+document.addEventListener('keydown', e => {
+  const modalOpen = document.getElementById('mindmapModal').classList.contains('open');
+  if (e.key === 'Escape'){
+    document.getElementById('mindmapModal').classList.remove('open');
+    document.getElementById('helpModal').classList.remove('open');
+  }
+  if (!modalOpen) return;
+  const tag = document.activeElement.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+  if (e.key === '+' || e.key === '='){ e.preventDefault(); mindmapZoomBy(1.25); }
+  if (e.key === '-' || e.key === '_'){ e.preventDefault(); mindmapZoomBy(1 / 1.25); }
+  if (e.key === '0'){ e.preventDefault(); mindmapFitToView(); }
+});
+
+function showCopyToast(){
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 1400);
+}
+
+function fallbackCopyText(text){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); } catch (err) { console.error(err); }
+  document.body.removeChild(ta);
+}
+
+function copyPreviewText(){
+  const text = previewMode === 'tree' ? treeText() : plainText();
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(showCopyToast).catch(() => {
+      fallbackCopyText(text);
+      showCopyToast();
+    });
+  } else {
+    fallbackCopyText(text);
+    showCopyToast();
+  }
+}
+
+document.getElementById('copyBtn').addEventListener('click', copyPreviewText);
+
+if (FS_SUPPORTED){
+  document.getElementById('autoSaveFileBtn').style.display = '';
+  document.getElementById('autoSaveFileBtn').addEventListener('click', connectAutoSaveFile);
+} else {
+  setAutoSaveStatus('Real-file auto-save needs Chrome or Edge, opened as a downloaded file.');
+}
+
+// ---------- PREVIEW PANE RESIZE (drag the handle on its right edge to widen/narrow it) ----------
+function setupPreviewResize(){
+  const previewPane = document.querySelector('.pane-preview');
+  const buildPane = document.querySelector('.pane-build');
+  const handle = document.getElementById('previewResizeHandle');
+  if (!previewPane || !handle) return;
+  handle.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    // Lock the build pane's current width the first time a drag starts, so it never
+    // gets squeezed — only the preview pane resizes, and extra width grows the page
+    // to the right instead of eating into the build pane's space.
+    if (buildPane && !buildPane.dataset.widthLocked){
+      const w = buildPane.getBoundingClientRect().width;
+      buildPane.style.flex = '0 0 ' + w + 'px';
+      buildPane.dataset.widthLocked = '1';
+    }
+    const startX = e.clientX;
+    const startWidth = previewPane.getBoundingClientRect().width;
+    handle.classList.add('active');
+    handle.setPointerCapture(e.pointerId);
+    function onMove(ev){
+      const delta = ev.clientX - startX; // dragging right (positive) widens the preview pane
+      let newWidth = startWidth + delta;
+      newWidth = Math.max(320, Math.min(1400, newWidth)); // build pane is locked, so extra width just grows the page rightward
+      previewPane.style.width = newWidth + 'px';
+    }
+    function onUp(){
+      handle.classList.remove('active');
+      handle.removeEventListener('pointermove', onMove);
+      handle.removeEventListener('pointerup', onUp);
+      handle.removeEventListener('pointercancel', onUp);
+    }
+    handle.addEventListener('pointermove', onMove);
+    handle.addEventListener('pointerup', onUp);
+    handle.addEventListener('pointercancel', onUp);
+  });
+}
+setupPreviewResize();
+
+// ---------- BUILD PANE RESIZE (its own separate handle — shrinks/grows Build only, never touches Preview) ----------
+function setupBuildResize(){
+  const buildPane = document.querySelector('.pane-build');
+  const handle = document.getElementById('buildResizeHandle');
+  if (!buildPane || !handle) return;
+  const BUILD_MIN = 280;
+  const BUILD_MAX = 1000;
+  const MARGIN_MIN = -60; // don't let the left edge push past the progress rail
+  handle.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = buildPane.getBoundingClientRect().width;
+    const startMargin = parseFloat(buildPane.style.marginLeft) || 0;
+    handle.classList.add('active');
+    handle.setPointerCapture(e.pointerId);
+    function onMove(ev){
+      // Build is first in the row, so its RIGHT edge is what flexbox actually moves when width
+      // changes — its own left edge is otherwise pinned. To make the LEFT edge itself move with
+      // the cursor (drag left = box visibly extends left), grow the width AND pull the left edge
+      // out by the same amount via a negative margin, so the right edge (next to the handle)
+      // stays anchored while the left edge tracks the pointer.
+      let delta = ev.clientX - startX; // dragging left = negative
+      let newWidth = startWidth - delta;
+      let newMargin = startMargin + delta;
+      if (newWidth < BUILD_MIN){ delta = startWidth - BUILD_MIN; newWidth = BUILD_MIN; newMargin = startMargin + delta; }
+      if (newWidth > BUILD_MAX){ delta = startWidth - BUILD_MAX; newWidth = BUILD_MAX; newMargin = startMargin + delta; }
+      if (newMargin < MARGIN_MIN) newMargin = MARGIN_MIN;
+      buildPane.style.flex = '0 0 ' + newWidth + 'px';
+      buildPane.style.marginLeft = newMargin + 'px';
+      buildPane.dataset.widthLocked = '1'; // so Preview's own handle won't overwrite this
+    }
+    function onUp(){
+      handle.classList.remove('active');
+      handle.removeEventListener('pointermove', onMove);
+      handle.removeEventListener('pointerup', onUp);
+      handle.removeEventListener('pointercancel', onUp);
+    }
+    handle.addEventListener('pointermove', onMove);
+    handle.addEventListener('pointerup', onUp);
+    handle.addEventListener('pointercancel', onUp);
+  });
+}
+setupBuildResize();
+
+document.getElementById('helpBtn').addEventListener('click', () => {
+  document.getElementById('helpModal').classList.add('open');
+});
+document.getElementById('helpModalClose').addEventListener('click', () => {
+  document.getElementById('helpModal').classList.remove('open');
+});
+document.getElementById('helpModal').addEventListener('click', e => {
+  if (e.target.id === 'helpModal') document.getElementById('helpModal').classList.remove('open');
+});
+
+document.getElementById('paneSwitch')?.querySelectorAll('[data-pane]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const pane = btn.dataset.pane;
+    const panes = document.querySelector('.panes');
+    if (panes){
+      panes.classList.toggle('view-build', pane === 'build');
+      panes.classList.toggle('view-preview', pane === 'preview');
+    }
+    document.querySelectorAll('#paneSwitch [data-pane]').forEach(b => {
+      b.classList.toggle('active', b === btn);
+    });
+  });
+});
+
+// ---------- THEME ----------
+const THEME_KEY = 'syllabus-numberer-theme';
+function applyTheme(theme){
+  if (theme === 'dark'){
+    document.documentElement.setAttribute('data-theme', 'dark');
+    const btn = document.getElementById('themeBtn');
+    if (btn) btn.textContent = '☀';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    const btn = document.getElementById('themeBtn');
+    if (btn) btn.textContent = '☾';
+  }
+  try { localStorage.setItem(THEME_KEY, theme); } catch (_) {}
+}
+function toggleTheme(){
+  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+  // re-render mindmap if visible so colors update
+  if (previewMode === 'mindmap') renderMindMap();
+}
+document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+
+(async function init(){
+  // restore theme before first paint of content
+  let savedTheme = 'light';
+  try { savedTheme = localStorage.getItem(THEME_KEY) || 'light'; } catch (_) {}
+  if (window.matchMedia && !localStorage.getItem(THEME_KEY)){
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) savedTheme = 'dark';
+  }
+  applyTheme(savedTheme);
+
+  await loadState();
+  await tryRestoreFileHandle();
+  render();
+})();
+</script>
+</body>
+</html>
